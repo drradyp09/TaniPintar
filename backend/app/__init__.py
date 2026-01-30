@@ -20,7 +20,7 @@ def create_app():
     login_manager.init_app(app)
     CORS(app, 
          resources={r"/api/*": {
-             "origins": ["http://localhost:5173"],
+             "origins": os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(','),
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "X-Sensor-Token"],
              "supports_credentials": True

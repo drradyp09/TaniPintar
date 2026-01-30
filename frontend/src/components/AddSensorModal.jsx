@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Input from './Input';
 import Button from './Button';
 import MapPicker from './MapPicker';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 const AddSensorModal = ({ onClose, onAdded, sensorToEdit = null }) => {
     const [formData, setFormData] = useState({
@@ -104,8 +105,8 @@ const AddSensorModal = ({ onClose, onAdded, sensorToEdit = null }) => {
         }
 
         const url = sensorToEdit
-            ? `http://localhost:5000/api/auth/sensors/${sensorToEdit.id}`
-            : 'http://localhost:5000/api/auth/sensors/register';
+            ? `${AUTH_BASE_URL}/sensors/${sensorToEdit.id}`
+            : `${AUTH_BASE_URL}/sensors/register`;
 
         const method = sensorToEdit ? 'PUT' : 'POST';
 

@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import SensorCard from '../components/SensorCard';
 import AddSensorModal from '../components/AddSensorModal';
 import SensorChart from '../components/SensorChart';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 const IoTMonitoring = () => {
     const navigate = useNavigate();
@@ -16,7 +17,7 @@ const IoTMonitoring = () => {
 
     const fetchSensors = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/auth/sensors', { credentials: 'include' });
+            const response = await fetch(`${AUTH_BASE_URL}/sensors`, { credentials: 'include' });
 
             if (response.status === 401) {
                 // Session expired, clear local storage and redirect
@@ -60,7 +61,7 @@ const IoTMonitoring = () => {
 
     const handleDeleteSensor = async (sensorId) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/auth/sensors/${sensorId}`, {
+            const response = await fetch(`${AUTH_BASE_URL}/sensors/${sensorId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

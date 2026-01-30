@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -59,7 +60,7 @@ const Register = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/register', {
+            const response = await fetch(`${AUTH_BASE_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

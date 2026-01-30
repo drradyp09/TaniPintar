@@ -12,6 +12,7 @@ import {
     Legend,
     Filler
 } from 'chart.js';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 ChartJS.register(
     CategoryScale,
@@ -63,7 +64,7 @@ const SensorChart = ({ sensor }) => {
     // Fetch real data from API
     const fetchChartData = async (isManual = false) => {
         try {
-            let url = `http://localhost:5000/api/auth/sensors/${sensor.id}/history`;
+            let url = `${AUTH_BASE_URL}/sensors/${sensor.id}/history`;
             const params = new URLSearchParams();
             if (startDate) params.append('start_date', startDate);
             if (endDate) params.append('end_date', endDate);

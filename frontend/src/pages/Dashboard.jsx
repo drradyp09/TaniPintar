@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -7,7 +8,7 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('home');
 
     const handleLogout = async () => {
-        await fetch('http://localhost:5000/api/auth/logout', { method: 'POST', credentials: 'include' });
+        await fetch(`${AUTH_BASE_URL}/logout`, { method: 'POST', credentials: 'include' });
         localStorage.removeItem('user');
         navigate('/login');
     };

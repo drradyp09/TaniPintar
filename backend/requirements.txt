@@ -5,3 +5,5 @@ flask-login
 requests
 python-dotenv
 python-dateutil
+gunicorn
+psycopg2-binary

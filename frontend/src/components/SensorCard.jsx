@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../apiConfig';
 
 const SensorCard = ({ sensor, onEdit, onDelete, isSelected, onSelect }) => {
     const [showToken, setShowToken] = useState(false);
@@ -201,7 +202,7 @@ const SensorCard = ({ sensor, onEdit, onDelete, isSelected, onSelect }) => {
                                 fontFamily: 'monospace',
                                 lineHeight: '1.4'
                             }}>
-                                {`Invoke-RestMethod -Uri "http://localhost:5000/api/auth/v1/telemetry" \`
+                                {`Invoke-RestMethod -Uri "${API_BASE_URL}/v1/telemetry" \`
 -Method Post \`
 -Headers @{"X-Sensor-Token"="${sensor.token}"} \`
 -ContentType "application/json" \`
@@ -216,7 +217,7 @@ const SensorCard = ({ sensor, onEdit, onDelete, isSelected, onSelect }) => {
                                 onClick={() => {
                                     const config = sensor.sensor_config || { temperature: { enabled: true }, humidity: { enabled: true } };
                                     const p = {}; Object.keys(config).forEach(k => { if (config[k].enabled) p[k] = 25.0; });
-                                    const cmd = `Invoke-RestMethod -Uri "http://localhost:5000/api/auth/v1/telemetry" \`-Method Post \`-Headers @{"X-Sensor-Token"="${sensor.token}"} \`-ContentType "application/json" \`-Body '${JSON.stringify(p)}'`;
+                                    const cmd = `Invoke-RestMethod -Uri "${API_BASE_URL}/v1/telemetry" \`-Method Post \`-Headers @{"X-Sensor-Token"="${sensor.token}"} \`-ContentType "application/json" \`-Body '${JSON.stringify(p)}'`;
                                     navigator.clipboard.writeText(cmd.replace(/`/g, '`\n'));
                                 }}
                                 style={{

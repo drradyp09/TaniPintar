@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { AUTH_BASE_URL } from '../apiConfig';
 
 const Login = () => {
     const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ const Login = () => {
 
         try {
             // In development processing via vite proxy or direct if CORS enabled
-            const response = await fetch('http://localhost:5000/api/auth/login', {
+            const response = await fetch(`${AUTH_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
