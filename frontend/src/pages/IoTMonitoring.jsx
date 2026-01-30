@@ -146,19 +146,6 @@ const IoTMonitoring = () => {
 
     const renderMonitoring = () => (
         <>
-            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ fontSize: '1.2rem' }}>Daftar Sensor</h2>
-                <Button
-                    onClick={() => {
-                        setEditingSensor(null);
-                        setShowModal(true);
-                    }}
-                    style={{ width: 'auto', fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-                >
-                    + Tambah Perangkat
-                </Button>
-            </div>
-
             {sensors.length === 0 ? (
                 <div className="card text-center" style={{ padding: '3rem 1rem' }}>
                     <p style={{ color: '#888' }}>Belum ada sensor yang terhubung.</p>
@@ -214,7 +201,7 @@ const IoTMonitoring = () => {
                 >
                     ← Kembali {view === 'menu' ? 'ke Dashboard' : 'ke Menu IoT'}
                 </button>
-                <h1 style={{ fontSize: '1.5rem', margin: 0 }}>📡 Monitoring IoT</h1>
+                <h1 style={{ fontSize: '1.5rem', margin: 0 }}>📊 Monitoring & Histori</h1>
                 <p style={{ color: '#666', fontSize: '0.9rem', margin: '0.5rem 0 0 0' }}>
                     {view === 'menu'
                         ? 'Pilih layanan IoT TaniPintar'
