@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import IoTMonitoring from './pages/IoTMonitoring';
+import DiseaseDetection from './pages/DiseaseDetection';
 
 function App() {
   // Simple auth check
@@ -40,6 +41,15 @@ function App() {
           element={
             <ProtectedRoute>
               <IoTMonitoring />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/disease-detection"
+          element={
+            <ProtectedRoute>
+              <DiseaseDetection />
             </ProtectedRoute>
           }
         />

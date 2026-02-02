@@ -16,7 +16,7 @@ const Dashboard = () => {
     const menuItems = [
         {
             id: 'home',
-            title: 'Beranda',
+            title: 'Home',
             icon: '🏠',
             available: true
         },
@@ -28,22 +28,22 @@ const Dashboard = () => {
             available: true
         },
         {
-            id: 'chlorophyll',
-            title: 'Klorofil',
+            id: 'disease-detection',
+            title: 'Plant Detection',
             icon: '🌿',
-            route: '/chlorophyll',
-            available: false
+            route: '/disease-detection',
+            available: true
         },
         {
             id: 'fertilizer',
-            title: 'Pupuk',
+            title: 'Water & Fertilizer',
             icon: '🧪',
             route: '/fertilizer',
             available: false
         },
         {
             id: 'chatbot',
-            title: 'Tanya',
+            title: 'Chat TaniPintar',
             icon: '💬',
             route: '/chatbot',
             available: false
@@ -163,9 +163,9 @@ const Dashboard = () => {
                                 color: '#718096'
                             }}>
                                 <li>Monitoring IoT - Pantau sensor real-time</li>
-                                <li style={{ opacity: 0.5 }}>Deteksi Klorofil - Segera hadir</li>
-                                <li style={{ opacity: 0.5 }}>Rekomendasi Pupuk - Segera hadir</li>
-                                <li style={{ opacity: 0.5 }}>Chatbot Tanya Tani - Segera hadir</li>
+                                <li style={{ opacity: 0.5 }}>Plant Detection - Segera hadir</li>
+                                <li style={{ opacity: 0.5 }}>Water & Fertilizer - Segera hadir</li>
+                                <li style={{ opacity: 0.5 }}>Chat TaniPintar - Segera hadir</li>
                             </ul>
                         </div>
                     </div>

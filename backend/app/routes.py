@@ -3,6 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from .models import User, db
 from . import login_manager
 from dateutil import parser
+import datetime
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -245,3 +246,56 @@ def get_sensor_history(sensor_id):
         })
         
     return jsonify(data)
+
+# --- Disease Detection Route ---
+import random
+
+@auth_bp.route('/disease-detection/analyze', methods=['POST'])
+@login_required
+def analyze_disease():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+    
+    detection_type = request.form.get('type', 'disease')
+    
+    if detection_type == 'chlorophyll':
+        # Mock chlorophyll data
+        spad_value = round(random.uniform(35.0, 55.0), 1)
+        result = {
+            'name': 'Kadar Klorofil (SPAD)',
+            'value': spad_value,
+            'unit': 'SPAD Units',
+            'status': 'Normal' if 40 <= spad_value <= 50 else ('Rendah' if spad_value < 40 else 'Tinggi'),
+            'recommendation': 'Kadar klorofil normal. Pertahankan pemupukan N yang seimbang.' if 40 <= spad_value <= 50 else 'Tingkatkan aplikasi pupuk Nitrogen untuk meningkatkan kadar klorofil.' if spad_value < 40 else 'Kurangi aplikasi pupuk Nitrogen untuk menghindari keracunan.',
+            'model_info': 'MobileNetV3-Chlorophyll-Regressor'
+        }
+    else:
+        # Mock disease analysis results based on MobileNetV3 architecture
+        diseases = [
+            {
+                'name': 'Bercak Daun (Leaf Spot)',
+                'confidence': 0.89,
+                'recommendation': 'Gunakan fungisida berbahan aktif mankozeb dan pastikan sirkulasi udara di sekitar tanaman baik.',
+                'model_info': 'MobileNetV3-CNN'
+            },
+            {
+                'name': 'Karat Daun (Rust)',
+                'confidence': 0.92,
+                'recommendation': 'Segera buang daun yang terinfeksi dan aplikasikan sulfur atau fungisida sistemik.',
+                'model_info': 'MobileNetV3-CNN'
+            },
+            {
+                'name': 'Tanaman Sehat',
+                'confidence': 0.98,
+                'recommendation': 'Tanaman terlihat sehat. Lanjutkan pemeliharaan rutin dan pantau secara berkala.',
+                'model_info': 'MobileNetV3-CNN'
+            }
+        ]
+        result = random.choice(diseases)
+    
+    return jsonify({
+        'status': 'success',
+        'type': detection_type,
+        'result': result,
+        'timestamp': datetime.datetime.now().isoformat()
+    }), 200
