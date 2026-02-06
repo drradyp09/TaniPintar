@@ -46,10 +46,15 @@ const DiseaseDetection = () => {
             if (response.ok) {
                 const data = await response.json();
                 setResult(data.result);
+
+                // Update preview with masked image if available
+                if (data.segmentation && data.segmentation.masked_image) {
+                    setPreviewUrl(`data:image/jpeg;base64,${data.segmentation.masked_image}`);
+                }
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                const errorMessage = errorData.error || 'Gagal menganalisis gambar.';
-                alert(`Error (${response.status}): ${errorMessage}\nPastikan Anda sudah login.`);
+                const errorMessage = errorData.error || errorData.message || 'Gagal menganalisis gambar.';
+                alert(`Error (${response.status}): ${errorMessage}`);
             }
         } catch (error) {
             console.error('Error analyzing image:', error);
@@ -201,7 +206,12 @@ const DiseaseDetection = () => {
                                 }}
                             />
                             <button
-                                onClick={() => { setPreviewUrl(null); setImage(null); setResult(null); }}
+                                onClick={() => {
+                                    setPreviewUrl(null);
+                                    setImage(null);
+                                    setResult(null);
+                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                }}
                                 style={{
                                     position: 'absolute',
                                     top: '10px',

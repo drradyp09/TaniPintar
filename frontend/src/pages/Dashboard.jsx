@@ -8,9 +8,14 @@ const Dashboard = () => {
     const [activeTab, setActiveTab] = useState('home');
 
     const handleLogout = async () => {
-        await fetch(`${AUTH_BASE_URL}/logout`, { method: 'POST', credentials: 'include' });
-        localStorage.removeItem('user');
-        navigate('/login');
+        try {
+            await fetch(`${AUTH_BASE_URL}/logout`, { method: 'POST', credentials: 'include' });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        } finally {
+            localStorage.removeItem('user');
+            navigate('/login');
+        }
     };
 
     const menuItems = [

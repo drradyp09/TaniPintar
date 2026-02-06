@@ -4,6 +4,8 @@ from .models import User, db
 from . import login_manager
 from dateutil import parser
 import datetime
+from .services.processing_service import segment_leaf
+from .services.ai_service import ai_service
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -256,46 +258,60 @@ def analyze_disease():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
     
+    image_file = request.files['image']
+    image_bytes = image_file.read()
+    
+    # Perform Leaf Segmentation
+    masked_base64, leaf_percentage, is_leaf = segment_leaf(image_bytes)
+    
+    if not is_leaf:
+        return jsonify({
+            'status': 'error',
+            'message': f'Objek utama bukan daun (Hanya {leaf_percentage}% terdeteksi sebagai area daun). Silakan pastikan objek di foto adalah daun dan memiliki kontras yang cukup.',
+            'leaf_area': leaf_percentage
+        }), 422
+
     detection_type = request.form.get('type', 'disease')
     
     if detection_type == 'chlorophyll':
-        # Mock chlorophyll data
-        spad_value = round(random.uniform(35.0, 55.0), 1)
-        result = {
-            'name': 'Kadar Klorofil (SPAD)',
-            'value': spad_value,
-            'unit': 'SPAD Units',
-            'status': 'Normal' if 40 <= spad_value <= 50 else ('Rendah' if spad_value < 40 else 'Tinggi'),
-            'recommendation': 'Kadar klorofil normal. Pertahankan pemupukan N yang seimbang.' if 40 <= spad_value <= 50 else 'Tingkatkan aplikasi pupuk Nitrogen untuk meningkatkan kadar klorofil.' if spad_value < 40 else 'Kurangi aplikasi pupuk Nitrogen untuk menghindari keracunan.',
-            'model_info': 'MobileNetV3-Chlorophyll-Regressor'
-        }
+        # Real AI Inference for Chlorophyll
+        import base64
+        masked_bytes = base64.b64decode(masked_base64)
+        
+        result = ai_service.predict_chlorophyll(masked_bytes)
+        
+        if not result:
+            return jsonify({
+                'status': 'error',
+                'message': 'Gagal melakukan prediksi Klorofil.'
+            }), 500
     else:
-        # Mock disease analysis results based on MobileNetV3 architecture
-        diseases = [
-            {
-                'name': 'Bercak Daun (Leaf Spot)',
-                'confidence': 0.89,
-                'recommendation': 'Gunakan fungisida berbahan aktif mankozeb dan pastikan sirkulasi udara di sekitar tanaman baik.',
-                'model_info': 'MobileNetV3-CNN'
-            },
-            {
-                'name': 'Karat Daun (Rust)',
-                'confidence': 0.92,
-                'recommendation': 'Segera buang daun yang terinfeksi dan aplikasikan sulfur atau fungisida sistemik.',
-                'model_info': 'MobileNetV3-CNN'
-            },
-            {
-                'name': 'Tanaman Sehat',
-                'confidence': 0.98,
-                'recommendation': 'Tanaman terlihat sehat. Lanjutkan pemeliharaan rutin dan pantau secara berkala.',
-                'model_info': 'MobileNetV3-CNN'
-            }
-        ]
-        result = random.choice(diseases)
+        # Real AI Inference
+        # Note: masking is done in processing_service, but predict_disease expects raw bytes or image object.
+        # Ideally we should pass the MASKED image to the AI.
+        # Let's decode the masked base64 back to bytes or modify ai_service to accept base64 or perform masking internally.
+        # Actually, ai_service accepts 'image_bytes'.
+        # But segment_leaf returns 'masked_base64'.
+        # We should use the masked image for prediction to ensure background doesn't affect result.
+        
+        import base64
+        masked_bytes = base64.b64decode(masked_base64)
+        
+        result = ai_service.predict_disease(masked_bytes)
+        
+        if not result:
+             return jsonify({
+                'status': 'error',
+                'message': 'Gagal melakukan prediksi AI.'
+            }), 500
     
     return jsonify({
         'status': 'success',
         'type': detection_type,
         'result': result,
+        'segmentation': {
+            'leaf_area_percentage': leaf_percentage,
+            'masked_image': masked_base64
+        },
         'timestamp': datetime.datetime.now().isoformat()
     }), 200
