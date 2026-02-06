@@ -85,23 +85,51 @@ const Register = () => {
     };
 
     return (
-        <div className="card">
-            <h2 className="text-center mb-4">Daftar Akun Baru</h2>
-            {errors.general && (
-                <div style={{
-                    color: '#d32f2f',
-                    marginBottom: '1rem',
-                    padding: '0.75rem',
-                    background: '#ffebee',
-                    borderRadius: '4px',
-                    textAlign: 'center'
+        <div className="glass-card animate-fade-in" style={{
+            padding: '2.5rem 2rem',
+            width: '100%',
+            maxWidth: '430px',
+            margin: '0 auto'
+        }}>
+            <div className="text-center mb-5">
+                <h1 style={{
+                    fontSize: '2.2rem',
+                    fontWeight: '800',
+                    color: 'var(--color-primary)',
+                    margin: '0 0 0.5rem 0',
+                    letterSpacing: '-1px'
                 }}>
-                    {errors.general}
+                    TaniPintar
+                </h1>
+                <p style={{
+                    color: 'var(--color-text-light)',
+                    fontSize: '0.95rem',
+                    fontWeight: '500',
+                    margin: 0
+                }}>
+                    Pendaftaran Anggota Baru
+                </p>
+            </div>
+
+            {errors.general && (
+                <div className="animate-fade-in" style={{
+                    color: 'var(--color-error)',
+                    marginBottom: '1.2rem',
+                    padding: '0.75rem',
+                    background: 'rgba(211, 47, 47, 0.05)',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    border: '1px solid rgba(211, 47, 47, 0.1)'
+                }}>
+                    ⚠️ {errors.general}
                 </div>
             )}
-            <form onSubmit={handleSubmit}>
+
+            <form onSubmit={handleSubmit} className="animate-stagger-1">
                 <Input
-                    label="Username"
+                    label="Nama Pengguna"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -118,7 +146,7 @@ const Register = () => {
                     error={errors.email}
                 />
                 <Input
-                    label="Password"
+                    label="Kata Sandi"
                     name="password"
                     type="password"
                     value={formData.password}
@@ -127,7 +155,7 @@ const Register = () => {
                     error={errors.password}
                 />
                 <Input
-                    label="Konfirmasi Password"
+                    label="Konfirmasi Kata Sandi"
                     name="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
@@ -135,12 +163,15 @@ const Register = () => {
                     required
                     error={errors.confirmPassword}
                 />
-                <div className="mt-4">
-                    <Button type="submit">DAFTAR</Button>
+                <div className="mt-5">
+                    <Button type="submit" className="btn" style={{ width: '100%', fontSize: '1rem', padding: '0.9rem' }}>
+                        DAFTAR SEKARANG
+                    </Button>
                 </div>
             </form>
-            <div className="text-center mt-4" style={{ fontSize: '0.9rem' }}>
-                Sudah punya akun? <Link to="/login">Login disini</Link>
+
+            <div className="text-center mt-5 animate-stagger-2" style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', fontWeight: '500' }}>
+                Sudah punya akun? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: '700', textDecoration: 'none' }}>Login disini</Link>
             </div>
         </div>
     );

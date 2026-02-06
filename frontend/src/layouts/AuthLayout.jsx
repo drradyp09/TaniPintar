@@ -3,12 +3,15 @@ import { Outlet } from 'react-router-dom';
 
 const AuthLayout = () => {
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="container">
-                <div className="auth-header">
-                    <div className="logo-text">🌱 TaniPintar</div>
-                    <p style={{ color: '#666' }}>Technology for Smart Farming</p>
-                </div>
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'var(--color-bg-gradient)',
+            padding: '1.5rem'
+        }}>
+            <div style={{ width: '100%', maxWidth: '450px' }}>
                 <Outlet />
             </div>
         </div>

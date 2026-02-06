@@ -40,11 +40,11 @@ const Dashboard = () => {
             available: true
         },
         {
-            id: 'fertilizer',
+            id: 'water-fertilizer',
             title: 'Water & Fertilizer',
             icon: '🧪',
-            route: '/fertilizer',
-            available: false
+            route: '/water-fertilizer',
+            available: true
         },
         {
             id: 'chatbot',
@@ -69,109 +69,155 @@ const Dashboard = () => {
     };
 
     return (
-        <div style={{
+        <div className="animate-fade-in" style={{
             minHeight: '100vh',
-            background: 'linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%)',
-            paddingBottom: '80px' // Space for bottom nav
+            paddingBottom: '90px',
+            background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.03) 0%, rgba(255, 255, 255, 0) 100%)'
         }}>
-            {/* Mobile-optimized container */}
-            <div style={{
-                maxWidth: '480px',
-                margin: '0 auto',
-                padding: '1rem'
-            }}>
+            <div className="mobile-container">
                 {/* Header */}
-                <div style={{
-                    background: 'white',
-                    borderRadius: '16px',
-                    padding: '1.25rem',
+                <div className="glass-card animate-stagger-1" style={{
+                    padding: '1.8rem',
                     marginBottom: '1.5rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    border: '1px solid var(--color-primary-glow)',
+                    background: 'rgba(255, 255, 255, 0.8)'
                 }}>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '0.5rem'
+                        marginBottom: '0.6rem'
                     }}>
-                        <h1 style={{
-                            fontSize: '1.5rem',
-                            margin: 0,
-                            background: 'linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            fontWeight: '700'
-                        }}>
-                            Halo, {user.username}! 👋
-                        </h1>
+                        <div>
+                            <p style={{ color: 'var(--color-primary)', fontSize: '0.85rem', margin: '0 0 4px 0', fontWeight: '800', letterSpacing: '1px' }}>SELAMAT DATANG</p>
+                            <h1 style={{
+                                fontSize: '1.8rem',
+                                margin: 0,
+                                color: 'var(--color-text)',
+                                fontWeight: '900',
+                                letterSpacing: '-0.8px'
+                            }}>
+                                {user.username}!
+                            </h1>
+                        </div>
                         <button
                             onClick={handleLogout}
+                            className="scale-hover"
                             style={{
-                                background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
-                                border: 'none',
-                                color: 'white',
+                                padding: '0.6rem 1.2rem',
+                                fontSize: '0.8rem',
+                                background: 'rgba(211, 47, 47, 0.1)',
+                                border: '1.5px solid rgba(211, 47, 47, 0.2)',
+                                borderRadius: '12px',
+                                color: 'var(--color-error)',
+                                fontWeight: '800',
                                 cursor: 'pointer',
-                                fontWeight: '600',
-                                fontSize: '0.85rem',
-                                padding: '0.5rem 1rem',
-                                borderRadius: '8px',
-                                boxShadow: '0 2px 6px rgba(238, 90, 111, 0.3)'
+                                transition: 'all 0.3s ease'
                             }}
                         >
-                            Keluar
+                            Log Out
                         </button>
                     </div>
+                    <div style={{
+                        height: '1px',
+                        background: 'var(--color-primary-glow)',
+                        margin: '1rem 0'
+                    }}></div>
                     <p style={{
-                        color: '#718096',
-                        fontSize: '0.85rem',
-                        margin: 0
+                        color: 'var(--color-text-light)',
+                        fontSize: '0.95rem',
+                        margin: 0,
+                        fontWeight: '600',
+                        fontStyle: 'italic'
                     }}>
-                        Technology for Smart Farming
+                        "Modernizing Agriculture through Intelligence"
                     </p>
                 </div>
 
                 {/* Main Content Area */}
-                <div style={{ marginBottom: '1rem' }}>
-                    <h2 style={{
-                        fontSize: '1.25rem',
-                        fontWeight: '700',
-                        color: '#2d3748',
-                        marginBottom: '1rem'
-                    }}>
-                        Selamat Datang di TaniPintar
-                    </h2>
+                <div className="animate-stagger-2">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
+                        <h2 style={{
+                            fontSize: '1.3rem',
+                            fontWeight: '800',
+                            color: 'var(--color-text)',
+                            margin: 0,
+                            letterSpacing: '-0.3px'
+                        }}>
+                            Eksplorasi Fitur
+                        </h2>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-primary)', fontWeight: '700', padding: '4px 12px', background: 'rgba(76,175,80,0.1)', borderRadius: '20px' }}>
+                            PRO VERSION
+                        </div>
+                    </div>
 
                     {/* Info Cards */}
-                    <div style={{ display: 'grid', gap: '1rem' }}>
-                        <div className="card" style={{
-                            padding: '1.5rem',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    <div style={{ display: 'grid', gap: '1.2rem' }}>
+                        <div className="glass-card scale-hover" style={{
+                            padding: '1.8rem',
+                            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
                             color: 'white',
-                            border: 'none'
+                            border: 'none',
+                            boxShadow: 'var(--shadow-glow)',
+                            position: 'relative',
+                            overflow: 'hidden'
                         }}>
-                            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'white' }}>
-                                📊 Status Sistem
-                            </h3>
-                            <p style={{ fontSize: '0.9rem', margin: 0, opacity: 0.9 }}>
-                                Semua sistem berjalan normal. Pilih menu di bawah untuk mengakses fitur.
-                            </p>
+                            <div style={{ position: 'relative', zIndex: 1 }}>
+                                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.8rem', color: 'white', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>📊</span> Ringkasan Lahan
+                                </h3>
+                                <p style={{ fontSize: '0.95rem', margin: 0, opacity: 0.9, lineHeight: '1.6', fontWeight: '500' }}>
+                                    Kondisi ekosistem pertanian Anda saat ini terpantau stabil. Lakukan pengecekan berkala pada sensor IoT.
+                                </p>
+                            </div>
+                            <div style={{
+                                position: 'absolute',
+                                right: '-20px',
+                                bottom: '-20px',
+                                fontSize: '6rem',
+                                opacity: 0.1,
+                                transform: 'rotate(-15deg)'
+                            }}>📈</div>
                         </div>
 
-                        <div className="card" style={{ padding: '1.5rem' }}>
-                            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: '#2d3748' }}>
-                                🎯 Fitur Tersedia
+                        <div className="glass-card" style={{ padding: '1.5rem', border: '1px solid var(--color-primary-glow)' }}>
+                            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--color-text)', fontWeight: '800' }}>
+                                🛡️ Smart Health Check
                             </h3>
-                            <ul style={{
-                                margin: '0.5rem 0 0 0',
-                                paddingLeft: '1.5rem',
-                                fontSize: '0.9rem',
-                                color: '#718096'
-                            }}>
-                                <li>Monitoring IoT - Pantau sensor real-time</li>
-                                <li style={{ opacity: 0.5 }}>Plant Detection - Segera hadir</li>
-                                <li style={{ opacity: 0.5 }}>Water & Fertilizer - Segera hadir</li>
-                                <li style={{ opacity: 0.5 }}>Chat TaniPintar - Segera hadir</li>
-                            </ul>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem' }}>
+                                <div className="animate-pulse-glow" style={{
+                                    background: 'rgba(76, 175, 80, 0.1)',
+                                    color: 'var(--color-primary)',
+                                    padding: '10px 18px',
+                                    borderRadius: '14px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '800',
+                                    border: '1px solid var(--color-primary-glow)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-primary)' }}></div>
+                                    IoT Online
+                                </div>
+                                <div style={{
+                                    background: 'rgba(33, 150, 243, 0.1)',
+                                    color: '#1e88e5',
+                                    padding: '10px 18px',
+                                    borderRadius: '14px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '800',
+                                    border: '1px solid rgba(33, 150, 243, 0.2)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#1e88e5' }}></div>
+                                    Vision AI Ready
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -180,89 +226,91 @@ const Dashboard = () => {
             {/* Bottom Navigation Bar */}
             <div style={{
                 position: 'fixed',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                background: 'white',
-                borderTop: '1px solid #e2e8f0',
-                boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-                zIndex: 1000
+                bottom: '15px',
+                left: '15px',
+                right: '15px',
+                background: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(15px)',
+                borderRadius: '24px',
+                border: '1px solid var(--color-primary-glow)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+                zIndex: 1000,
+                maxWidth: '450px',
+                margin: '0 auto'
             }}>
                 <div style={{
-                    maxWidth: '480px',
-                    margin: '0 auto',
                     display: 'flex',
                     justifyContent: 'space-around',
-                    padding: '0.5rem 0'
+                    padding: '0.6rem 0.4rem'
                 }}>
                     {menuItems.map(item => (
                         <button
                             key={item.id}
                             onClick={() => handleMenuClick(item)}
+                            className={item.available ? "scale-hover" : ""}
                             style={{
                                 flex: 1,
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '0.25rem',
-                                padding: '0.5rem',
+                                gap: '0.3rem',
+                                padding: '0.6rem 0',
                                 background: 'none',
                                 border: 'none',
                                 cursor: item.available ? 'pointer' : 'not-allowed',
                                 opacity: item.available ? 1 : 0.4,
-                                transition: 'all 0.2s ease',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 position: 'relative'
                             }}
                         >
-                            {/* Icon */}
+                            {/* Icon with Active Highlight */}
                             <div style={{
-                                fontSize: '1.5rem',
-                                filter: activeTab === item.id ? 'none' : 'grayscale(100%)',
-                                transform: activeTab === item.id ? 'scale(1.1)' : 'scale(1)',
-                                transition: 'all 0.2s ease'
+                                fontSize: '1.6rem',
+                                filter: activeTab === item.id ? 'drop-shadow(0 0 8px var(--color-primary-glow))' : 'grayscale(100%)',
+                                transform: activeTab === item.id ? 'translateY(-5px) scale(1.15)' : 'translateY(0) scale(1)',
+                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                             }}>
                                 {item.icon}
                             </div>
 
                             {/* Label */}
                             <span style={{
-                                fontSize: '0.7rem',
-                                fontWeight: activeTab === item.id ? '700' : '500',
-                                color: activeTab === item.id ? '#2e7d32' : '#718096',
-                                transition: 'all 0.2s ease'
+                                fontSize: '0.65rem',
+                                fontWeight: '800',
+                                color: activeTab === item.id ? 'var(--color-primary-dark)' : 'var(--color-text-light)',
+                                letterSpacing: '0.2px',
+                                textTransform: 'uppercase',
+                                textAlign: 'center',
+                                width: '100%',
+                                display: 'block'
                             }}>
                                 {item.title}
                             </span>
 
-                            {/* Active Indicator */}
+                            {/* Active Dot */}
                             {activeTab === item.id && (
                                 <div style={{
                                     position: 'absolute',
-                                    top: 0,
-                                    left: '50%',
-                                    transform: 'translateX(-50%)',
-                                    width: '40px',
-                                    height: '3px',
-                                    background: 'linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%)',
-                                    borderRadius: '0 0 3px 3px'
+                                    bottom: '0',
+                                    width: '5px',
+                                    height: '5px',
+                                    background: 'var(--color-primary)',
+                                    borderRadius: '50%',
+                                    boxShadow: '0 0 10px var(--color-primary)'
                                 }}></div>
                             )}
 
-                            {/* Coming Soon Badge */}
+                            {/* Coming Soon Indicator */}
                             {!item.available && (
                                 <div style={{
                                     position: 'absolute',
                                     top: '4px',
-                                    right: '8px',
+                                    right: '4px',
+                                    width: '6px',
+                                    height: '6px',
                                     background: '#f59e0b',
-                                    color: 'white',
-                                    fontSize: '0.5rem',
-                                    padding: '2px 4px',
-                                    borderRadius: '6px',
-                                    fontWeight: '700'
-                                }}>
-                                    SOON
-                                </div>
+                                    borderRadius: '50%'
+                                }}></div>
                             )}
                         </button>
                     ))}

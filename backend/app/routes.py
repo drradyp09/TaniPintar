@@ -6,6 +6,7 @@ from dateutil import parser
 import datetime
 from .services.processing_service import segment_leaf
 from .services.ai_service import ai_service
+from .services.agri_logic import agri_logic
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -315,3 +316,119 @@ def analyze_disease():
         },
         'timestamp': datetime.datetime.now().isoformat()
     }), 200
+
+# --- Agriculture Logic Routes ---
+
+@auth_bp.route('/agriculture/crops', methods=['GET'])
+def get_crops():
+    """Returns list of supported crops and their metadata."""
+    return jsonify(agri_logic.CROP_DATA), 200
+
+@auth_bp.route('/agriculture/soil-textures', methods=['GET'])
+def get_soil_textures():
+    """Returns list of soil textures and moisture metadata."""
+    return jsonify(agri_logic.SOIL_DATA), 200
+
+@auth_bp.route('/agriculture/calculate-water', methods=['POST'])
+@login_required
+def calculate_water():
+    data = request.get_json()
+    if not data or not data.get('crop_type') or not data.get('age_days') or not data.get('area_m2'):
+        return jsonify({'error': 'Missing required fields (crop_type, age_days, area_m2)'}), 400
+        
+    # Optional weather data (can be fetched from user's sensors if not provided)
+    t_min = data.get('t_min')
+    t_max = data.get('t_max')
+    humidity = data.get('humidity')
+    wind_speed = data.get('wind_speed')
+    pressure = data.get('pressure')
+    solar_rad = data.get('solar_rad')
+    t_mean = data.get('t_mean')
+    
+    # If data not provided, try to fetch from the latest sensor data of the user
+    if any(v is None for v in [t_min, t_max, humidity, wind_speed]):
+        sensor = Sensor.query.filter_by(user_id=current_user.id).first()
+        if sensor and sensor.data_logs:
+            latest = sensor.data_logs[-1]
+            temp = latest.temperature or 25.0
+            t_min = t_min if t_min is not None else temp - 2
+            t_max = t_max if t_max is not None else temp + 2
+            humidity = humidity if humidity is not None else (latest.humidity or 70.0)
+            wind_speed = wind_speed if wind_speed is not None else (latest.wind_speed or 2.0)
+            pressure = pressure if pressure is not None else (latest.pressure or 101.3)
+        else:
+            # Fallback defaults for tropics
+            t_min = t_min if t_min is not None else 23.0
+            t_max = t_max if t_max is not None else 31.0
+            humidity = humidity if humidity is not None else (latest.humidity or 75.0)
+            wind_speed = wind_speed if wind_speed is not None else (latest.wind_speed or 1.5)
+            pressure = pressure if pressure is not None else (latest.pressure or 101.3)
+            solar_rad = solar_rad if solar_rad is not None else 15.0 # Typical trop Rs
+            t_mean = t_mean if t_mean is not None else 27.0
+
+    result = agri_logic.calculate_irrigation(
+        data['crop_type'],
+        int(data['age_days']),
+        float(data['area_m2']),
+        float(t_min),
+        float(t_max),
+        float(humidity),
+        float(wind_speed),
+        float(pressure),
+        solar_rad=float(solar_rad) if solar_rad is not None else None,
+        t_mean=float(t_mean) if t_mean is not None else None
+    )
+    
+    return jsonify(result), 200
+
+@auth_bp.route('/agriculture/seasonal-water-demand', methods=['POST'])
+@login_required
+def calculate_seasonal_water_demand():
+    data = request.get_json()
+    if not data or not data.get('crop_type') or not data.get('area_m2'):
+        return jsonify({'error': 'Missing required fields (crop_type, area_m2)'}), 400
+        
+    eto_avg = data.get('eto_avg', 4.0)
+    result = agri_logic.calculate_seasonal_water_demand(
+        data['crop_type'],
+        float(data['area_m2']),
+        float(eto_avg)
+    )
+    
+    if not result:
+        return jsonify({'error': 'Crop type not supported'}), 400
+    
+    return jsonify(result), 200
+
+@auth_bp.route('/agriculture/seasonal-demand', methods=['POST'])
+@login_required
+def calculate_seasonal_demand():
+    data = request.get_json()
+    if not data or not data.get('crop_type') or not data.get('area_m2'):
+        return jsonify({'error': 'Missing required fields (crop_type, area_m2)'}), 400
+        
+    eto_avg = data.get('eto_avg', 4.0)
+    result = agri_logic.calculate_seasonal_demand(
+        data['crop_type'],
+        float(data['area_m2']),
+        float(eto_avg)
+    )
+    
+    return jsonify(result), 200
+
+@auth_bp.route('/agriculture/calculate-fertilizer', methods=['POST'])
+@login_required
+def calculate_fertilizer():
+    data = request.get_json()
+    if not data or not data.get('crop_type') or not data.get('area_m2'):
+        return jsonify({'error': 'Missing required fields (crop_type, area_m2)'}), 400
+        
+    result = agri_logic.recommend_fertilizer(
+        data['crop_type'],
+        float(data['area_m2'])
+    )
+    
+    if not result:
+        return jsonify({'error': 'Crop type not supported'}), 400
+        
+    return jsonify(result), 200

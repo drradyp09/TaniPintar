@@ -5,6 +5,9 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import IoTMonitoring from './pages/IoTMonitoring';
 import DiseaseDetection from './pages/DiseaseDetection';
+import WaterFertilizer from './pages/WaterFertilizer';
+import IrrigationPlanner from './pages/IrrigationPlanner';
+import FertilizerPlanner from './pages/FertilizerPlanner';
 
 function App() {
   // Simple auth check
@@ -50,6 +53,33 @@ function App() {
           element={
             <ProtectedRoute>
               <DiseaseDetection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/water-fertilizer"
+          element={
+            <ProtectedRoute>
+              <WaterFertilizer />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/irrigation"
+          element={
+            <ProtectedRoute>
+              <IrrigationPlanner />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/fertilizer"
+          element={
+            <ProtectedRoute>
+              <FertilizerPlanner />
             </ProtectedRoute>
           }
         />

@@ -233,71 +233,79 @@ const SensorChart = ({ sensor }) => {
     const hasActiveSensors = Object.keys(axisAssignments).length > 0;
 
     return (
-        <div style={{ marginTop: '1.5rem' }}>
-            <div style={{
-                background: 'white',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                marginBottom: '1rem',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                border: '1px solid #e2e8f0'
+        <div className="animate-fade-in" style={{ marginTop: '2rem' }}>
+            <div className="glass-card" style={{
+                padding: '1.8rem',
+                marginBottom: '1.5rem',
+                border: '1px solid var(--color-primary-glow)',
+                background: 'rgba(255, 255, 255, 0.7)'
             }}>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1rem',
+                    marginBottom: '1.5rem',
                     flexWrap: 'wrap',
-                    gap: '1rem'
+                    gap: '1.2rem'
                 }}>
                     <h3 style={{
-                        fontSize: '1.1rem',
-                        fontWeight: '700',
-                        color: '#2d3748',
-                        margin: 0
+                        fontSize: '1.25rem',
+                        fontWeight: '800',
+                        color: 'var(--color-text)',
+                        margin: 0,
+                        letterSpacing: '-0.3px'
                     }}>
-                        {(!startDate && !endDate) ? '📊 Visualisasi Data Real-Time' : '📅 Histori Data Terpilih'}
+                        {(!startDate && !endDate) ? '📊 Analisis Real-Time' : '📅 Histori Data'}
                     </h3>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                         {/* Date Filters */}
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', flexWrap: 'wrap' }}>
                             <input
                                 type="datetime-local"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
                                 style={{
-                                    fontSize: '0.8rem',
-                                    padding: '0.4rem',
-                                    borderRadius: '6px',
-                                    border: '1px solid #cbd5e0'
+                                    fontSize: '0.85rem',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--color-primary-glow)',
+                                    background: 'var(--color-white)',
+                                    fontWeight: '600',
+                                    color: 'var(--color-text)'
                                 }}
                             />
-                            <span style={{ fontSize: '0.8rem' }}>s/d</span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--color-text-light)' }}>-</span>
                             <input
                                 type="datetime-local"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 style={{
-                                    fontSize: '0.8rem',
-                                    padding: '0.4rem',
-                                    borderRadius: '6px',
-                                    border: '1px solid #cbd5e0'
+                                    fontSize: '0.85rem',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    border: '1px solid var(--color-primary-glow)',
+                                    background: 'var(--color-white)',
+                                    fontWeight: '600',
+                                    color: 'var(--color-text)'
                                 }}
                             />
                             {(startDate || endDate) && (
                                 <button
                                     onClick={() => { setStartDate(''); setEndDate(''); }}
+                                    className="scale-hover"
                                     style={{
-                                        background: '#f1f5f9',
-                                        border: '1px solid #cbd5e0',
-                                        borderRadius: '6px',
-                                        padding: '0.4rem 0.8rem',
+                                        background: 'rgba(226, 232, 240, 0.5)',
+                                        border: '1px solid var(--color-primary-glow)',
+                                        borderRadius: '8px',
+                                        padding: '0.5rem 1rem',
                                         fontSize: '0.8rem',
-                                        cursor: 'pointer'
+                                        cursor: 'pointer',
+                                        fontWeight: '700',
+                                        color: 'var(--color-text)'
                                     }}
                                 >
-                                    Reset
+                                    RESET
                                 </button>
                             )}
                         </div>
@@ -307,38 +315,42 @@ const SensorChart = ({ sensor }) => {
                             value={chartType}
                             onChange={(e) => setChartType(e.target.value)}
                             style={{
-                                padding: '0.4rem 0.75rem',
-                                borderRadius: '6px',
-                                border: '1px solid #cbd5e0',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '8px',
+                                border: '1px solid var(--color-primary-glow)',
                                 fontSize: '0.85rem',
-                                background: '#f7fafc',
+                                background: 'var(--color-white)',
                                 cursor: 'pointer',
-                                fontWeight: '600',
-                                color: '#4a5568'
+                                fontWeight: '700',
+                                color: 'var(--color-text)',
+                                boxShadow: 'var(--shadow-soft)'
                             }}
                         >
-                            <option value="line">📈 Garis</option>
-                            <option value="area">🏔️ Area</option>
-                            <option value="bar">📊 Batang</option>
+                            <option value="line">📈 GARIS</option>
+                            <option value="area">🏔️ AREA</option>
+                            <option value="bar">📊 BATANG</option>
                         </select>
 
                         {(!startDate && !endDate) && (
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem',
+                                gap: '0.6rem',
                                 fontSize: '0.85rem',
-                                color: '#4caf50',
-                                marginLeft: '0.5rem'
+                                color: 'var(--color-primary)',
+                                fontWeight: '800',
+                                background: 'rgba(76, 175, 80, 0.1)',
+                                padding: '4px 12px',
+                                borderRadius: '20px',
+                                border: '1px solid var(--color-primary-glow)'
                             }}>
-                                <div style={{
-                                    width: '8px',
-                                    height: '8px',
+                                <div className="animate-pulse-glow" style={{
+                                    width: '10px',
+                                    height: '10px',
                                     borderRadius: '50%',
-                                    background: '#4caf50',
-                                    animation: 'pulse 2s infinite'
+                                    background: 'var(--color-primary)'
                                 }}></div>
-                                Live
+                                LIVE
                             </div>
                         )}
                     </div>
@@ -347,15 +359,16 @@ const SensorChart = ({ sensor }) => {
                 {/* Sensor Filter Chips */}
                 <div style={{
                     display: 'flex',
-                    gap: '0.5rem',
+                    gap: '0.6rem',
                     flexWrap: 'wrap',
-                    marginBottom: '1.5rem',
-                    padding: '0.75rem',
-                    background: '#f8f9fa',
-                    borderRadius: '8px'
+                    marginBottom: '2rem',
+                    padding: '1.2rem',
+                    background: 'rgba(248, 250, 252, 0.6)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(0,0,0,0.03)'
                 }}>
-                    <span style={{ fontSize: '0.85rem', color: '#666', display: 'flex', alignItems: 'center', marginRight: '0.5rem', width: '100%' }}>
-                        Atur Sumbu Grafik (Klik untuk ganti):
+                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: '800', display: 'flex', alignItems: 'center', marginRight: '0.5rem', width: '100%', marginBottom: '0.5rem' }}>
+                        KONFIGURASI SUMBU (LETAK)
                     </span>
                     {activeSensors.map(key => {
                         const info = getSensorDetails(key);
@@ -364,49 +377,50 @@ const SensorChart = ({ sensor }) => {
                             <button
                                 key={key}
                                 onClick={() => toggleSensorAxis(key)}
+                                className="scale-hover"
                                 style={{
-                                    padding: '0.35rem 0.85rem',
-                                    borderRadius: '16px',
-                                    border: axis ? `2px solid ${info.color}` : '1px solid #cbd5e0',
-                                    background: axis ? info.color.replace('rgb', 'rgba').replace(')', ', 0.1)') : 'white',
-                                    color: axis ? info.color : '#718096',
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '20px',
+                                    border: axis ? `2px solid ${info.color}` : '1px solid var(--color-primary-glow)',
+                                    background: axis ? info.color.replace('rgb', 'rgba').replace(')', ', 0.1)') : 'var(--color-white)',
+                                    color: axis ? info.color : 'var(--color-text-light)',
                                     fontSize: '0.8rem',
-                                    fontWeight: axis ? '600' : '400',
+                                    fontWeight: '700',
                                     cursor: 'pointer',
-                                    transition: 'all 0.2s',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '0.5rem'
+                                    gap: '0.6rem',
+                                    boxShadow: axis ? '0 4px 6px rgba(0,0,0,0.05)' : 'none'
                                 }}
                             >
-                                {/* Indicator Badge */}
                                 <span style={{
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    width: '18px',
-                                    height: '18px',
+                                    width: '20px',
+                                    height: '20px',
                                     borderRadius: '50%',
-                                    background: axis ? info.color : '#e2e8f0',
-                                    color: axis ? 'white' : '#a0aec0',
-                                    fontSize: '0.65rem',
-                                    fontWeight: '700'
+                                    background: axis ? info.color : 'rgba(226, 232, 240, 0.8)',
+                                    color: axis ? 'var(--color-white)' : 'var(--color-text-light)',
+                                    fontSize: '0.7rem',
+                                    fontWeight: '900'
                                 }}>
                                     {axis === 'left' ? 'L' : axis === 'right' ? 'R' : '•'}
                                 </span>
-                                {info.label.split('(')[0]}
+                                {info.label.split('(')[0].trim()}
                             </button>
                         );
                     })}
                 </div>
 
                 {!hasActiveSensors ? (
-                    <div style={{ padding: '2rem', textAlign: 'center', color: '#a0aec0', fontStyle: 'italic' }}>
-                        Pilih minimal satu sensor untuk melihat grafik
+                    <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-light)', fontStyle: 'italic', background: 'rgba(0,0,0,0.02)', borderRadius: '12px', fontWeight: '500' }}>
+                        Pilih minimal satu sensor di atas untuk memvisualisasikan data
                     </div>
                 ) : (
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <div style={{ height: '300px' }}>
+                    <div style={{ marginBottom: '1.5rem', minHeight: '350px' }}>
+                        <div style={{ height: '350px' }}>
                             {chartType === 'bar'
                                 ? <Bar data={getCombinedData()} options={getChartOptions()} />
                                 : <Line data={getCombinedData()} options={getChartOptions()} />
@@ -415,17 +429,20 @@ const SensorChart = ({ sensor }) => {
                     </div>
                 )}
 
-                <p style={{
+                <div style={{
+                    marginTop: '1.5rem',
+                    padding: '0.8rem',
+                    background: 'rgba(0,0,0,0.02)',
+                    borderRadius: '8px',
                     fontSize: '0.75rem',
-                    color: '#718096',
-                    marginTop: '1rem',
+                    color: 'var(--color-text-light)',
                     textAlign: 'center',
-                    fontStyle: 'italic'
+                    fontStyle: 'italic',
+                    fontWeight: '600'
                 }}>
-                    💡 Data diperbarui setiap 5 detik (menampilkan data asli dari datalogger)
-                </p>
+                    💡 Info: Data ditarik dari datalogger setiap 5 detik. Gunakan mouse/sentuhan pada grafik untuk detail data.
+                </div>
             </div>
-
             <style>{`
                 @keyframes pulse {
                     0%, 100% { opacity: 1; }

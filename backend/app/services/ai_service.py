@@ -27,8 +27,11 @@ import io
 class AIService:
     _instance = None
     _interpreter = None
+    _chlorophyll_interpreter = None
     _input_details = None
     _output_details = None
+    _chlorophyll_input_details = None
+    _chlorophyll_output_details = None
     
     # PlantVillage Classes (38 classes)
     # Note: The generic MobileNet model we downloaded has 1001 classes (ImageNet).
@@ -83,6 +86,7 @@ class AIService:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         models_dir = os.path.abspath(os.path.join(current_dir, '..', 'models'))
         model_path = os.path.join(models_dir, 'plant_disease_model.tflite')
+        chlorophyll_model_path = os.path.join(models_dir, 'plant_chlorophyll_model.tflite')
         labels_path = os.path.join(models_dir, 'labels.txt')
         
         try:
@@ -94,20 +98,30 @@ class AIService:
             else:
                 print(f"labels.txt not found, using default {len(self._class_names)} classes.")
 
+            # Load Disease Model
             if os.path.exists(model_path):
-                print(f"Loading TFLite Model from {model_path}...")
+                print(f"Loading Disease TFLite Model from {model_path}...")
                 self._interpreter = Interpreter(model_path=model_path)
                 self._interpreter.allocate_tensors()
-                
                 self._input_details = self._interpreter.get_input_details()
                 self._output_details = self._interpreter.get_output_details()
-                
-                print("TFLite Model loaded successfully.")
-                print(f"Input Shape: {self._input_details[0]['shape']}")
+                print("Disease TFLite Model loaded successfully.")
             else:
-                print(f"Model file not found at {model_path}")
+                print(f"Disease Model file not found at {model_path}")
+
+            # Load Chlorophyll Model
+            if os.path.exists(chlorophyll_model_path):
+                print(f"Loading Chlorophyll TFLite Model from {chlorophyll_model_path}...")
+                self._chlorophyll_interpreter = Interpreter(model_path=chlorophyll_model_path)
+                self._chlorophyll_interpreter.allocate_tensors()
+                self._chlorophyll_input_details = self._chlorophyll_interpreter.get_input_details()
+                self._chlorophyll_output_details = self._chlorophyll_interpreter.get_output_details()
+                print("Chlorophyll TFLite Model loaded successfully.")
+            else:
+                print(f"Chlorophyll Model file not found at {chlorophyll_model_path}")
+
         except Exception as e:
-            print(f"Failed to load TFLite model: {e}")
+            print(f"Failed to load TFLite models: {e}")
 
     def predict_disease(self, image_bytes):
         if self._interpreter is None:
@@ -222,35 +236,63 @@ class AIService:
             return None
 
     def predict_chlorophyll(self, image_bytes):
-        # Current TFLite model is only for disease classification.
-        # We need a separate Regression TFLite model for Chlorophyll.
-        # For now, we keep the mock or simple heuristic for Chlorophyll 
-        # unless a specific .tflite is provided.
-        
-        # Simple Heuristic based on Green channel intensity (G) relative to R and B
         try:
             img = Image.open(io.BytesIO(image_bytes))
-            img = img.resize((50, 50))
+            # Convert to RGB if needed
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            
             img_array = np.array(img)
             
-            r = np.mean(img_array[:,:,0])
-            g = np.mean(img_array[:,:,1])
-            b = np.mean(img_array[:,:,2])
+            # --- Brightness Calculation & Correction ---
+            # Using standard luminance coefficients
+            # Y = 0.299*R + 0.587*G + 0.114*B
+            brightness = np.mean(0.299 * img_array[:,:,0] + 0.587 * img_array[:,:,1] + 0.114 * img_array[:,:,2])
             
-            # Simple SPAD approximation formula (heuristic)
-            # SPAD correlates with Greenness. 
-            # (Exaggerated for demo purposes)
-            spad_value = (g / (r + b + 1.0)) * 50.0 
-            spad_value = min(max(spad_value, 10.0), 80.0) # Clamp 10-80
+            # Normal brightness range is typically considered around 100-180
+            # Correction factor: If too dark, SPAD might be underestimated. If too bright, overestimated.
+            # Simple linear compensation: factor = 1.0 + (target_brightness - current_brightness) * sensitivity
+            target_brightness = 128.0
+            brightness_factor = 1.0 + (target_brightness - brightness) * 0.001 
+            # Clamp factor to avoid wild swings
+            brightness_factor = min(max(brightness_factor, 0.8), 1.2)
+
+            if self._chlorophyll_interpreter is not None:
+                # --- Advanced Regression Model ---
+                input_shape = self._chlorophyll_input_details[0]['shape']
+                img_resized = img.resize((input_shape[2], input_shape[1]))
+                input_data = np.expand_dims(np.array(img_resized).astype(np.float32) / 255.0, axis=0)
+                
+                self._chlorophyll_interpreter.set_tensor(self._chlorophyll_input_details[0]['index'], input_data)
+                self._chlorophyll_interpreter.invoke()
+                
+                model_output = self._chlorophyll_interpreter.get_tensor(self._chlorophyll_output_details[0]['index'])
+                raw_spad = float(np.squeeze(model_output))
+                
+                # Apply brightness correction
+                spad_value = raw_spad * brightness_factor
+                model_info = f'Regression-Model-V2 (L:{brightness:.1f})'
+            else:
+                # --- Fallback Heuristic ---
+                r = np.mean(img_array[:,:,0])
+                g = np.mean(img_array[:,:,1])
+                b = np.mean(img_array[:,:,2])
+                
+                raw_spad = (g / (r + b + 1.0)) * 50.0 
+                spad_value = raw_spad * brightness_factor
+                model_info = f'Heuristic-Analysis-V1.1 (L:{brightness:.1f})'
+
+            # Clamp SPAD value to realistic range (10-80)
+            spad_value = min(max(spad_value, 10.0), 80.0)
             
             status = 'Normal'
             rec = 'Kadar klorofil normal.'
             if spad_value < 35:
                 status = 'Rendah'
-                rec = 'Kadar klorofil rendah. Tambah pupuk N.'
+                rec = 'Kadar klorofil rendah. Direkomendasikan pemupukan Nitrogen (N).'
             elif spad_value > 60:
                 status = 'Tinggi'
-                rec = 'Kadar klorofil tinggi.'
+                rec = 'Kadar klorofil tinggi. Pertumbuhan sangat baik.'
 
             return {
                 'name': 'Kadar Klorofil (SPAD)',
@@ -258,15 +300,17 @@ class AIService:
                 'unit': 'SPAD Units',
                 'status': status,
                 'recommendation': rec,
-                'model_info': 'Heuristic-Analysis (v1.0)'
+                'model_info': model_info,
+                'brightness': round(brightness, 1)
             }
         except Exception as e:
-             return {
+            print(f"Chlorophyll Prediction Error: {e}")
+            return {
                 'name': 'Kadar Klorofil',
                 'value': 0,
                 'unit': 'SPAD',
                 'status': 'Error',
-                'recommendation': 'Gagal analisis',
+                'recommendation': f'Gagal analisis: {str(e)}',
                 'model_info': 'Error'
             }
 

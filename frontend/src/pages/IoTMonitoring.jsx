@@ -85,77 +85,90 @@ const IoTMonitoring = () => {
         <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1.5rem',
-            marginTop: '2rem'
+            gap: '1.8rem',
+            marginTop: '2.5rem'
         }}>
             <div
-                className="card text-center"
+                className="glass-card scale-hover text-center animate-stagger-2"
                 onClick={() => {
                     setEditingSensor(null);
                     setShowModal(true);
                 }}
                 style={{
-                    padding: '3rem 2rem',
+                    padding: '3.5rem 2rem',
                     cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    border: '2px dashed #2e7d32',
-                    background: '#f1f8e9'
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    border: '2px dashed var(--color-primary-glow)',
+                    background: 'rgba(76, 175, 80, 0.04)',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                 }}
             >
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>➕</div>
-                <h3 style={{ color: '#2e7d32', marginBottom: '0.5rem' }}>Tambah Perangkat IoT</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666' }}>
-                    Daftarkan perangkat datalogger baru untuk mulai memantau lahan Anda.
+                <div style={{
+                    fontSize: '4rem',
+                    marginBottom: '1.5rem',
+                    filter: 'drop-shadow(0 4px 8px rgba(76,175,80,0.2))'
+                }}>🍃</div>
+                <h3 style={{
+                    color: 'var(--color-primary-dark)',
+                    marginBottom: '0.8rem',
+                    fontWeight: '800',
+                    fontSize: '1.4rem'
+                }}>Registrasi IoT</h3>
+                <p style={{ fontSize: '0.95rem', color: 'var(--color-text-light)', lineHeight: '1.6', fontWeight: '500' }}>
+                    Siapkan perangkat datalogger Anda dan hubungkan ke ekosistem pintar kami.
                 </p>
             </div>
 
             <div
-                className="card text-center"
+                className="glass-card scale-hover text-center animate-stagger-3"
                 onClick={() => setView('monitoring')}
                 style={{
-                    padding: '3rem 2rem',
+                    padding: '3.5rem 2rem',
                     cursor: 'pointer',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    border: '1px solid #e2e8f0',
-                    background: 'white'
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    border: '1px solid var(--color-primary-glow)',
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                 }}
             >
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📊</div>
-                <h3 style={{ color: '#2d3748', marginBottom: '0.5rem' }}>Monitoring & Histori</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666' }}>
-                    Lihat data real-time dan riwayat sensor yang telah terpasang di lapangan.
+                <div style={{
+                    fontSize: '4rem',
+                    marginBottom: '1.5rem',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+                }}>📊</div>
+                <h3 style={{
+                    color: 'var(--color-text)',
+                    marginBottom: '0.8rem',
+                    fontWeight: '800',
+                    fontSize: '1.4rem'
+                }}>Pantau & Histori</h3>
+                <p style={{ fontSize: '0.95rem', color: 'var(--color-text-light)', lineHeight: '1.6', fontWeight: '500' }}>
+                    Akses visualisasi data real-time dan analisis tren histori lahan Anda.
                 </p>
             </div>
         </div>
     );
 
     const renderMonitoring = () => (
-        <>
+        <div className="animate-stagger-2">
             {sensors.length === 0 ? (
-                <div className="card text-center" style={{ padding: '3rem 1rem' }}>
-                    <p style={{ color: '#888' }}>Belum ada sensor yang terhubung.</p>
-                    <p style={{ fontSize: '0.9rem' }}>Klik tombol Tambah Perangkat untuk mendaftarkan alat.</p>
+                <div className="glass-card text-center" style={{ padding: '4rem 2rem', border: '1.5px dashed var(--color-primary-glow)' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>🛰️</div>
+                    <p style={{ color: 'var(--color-text-light)', fontWeight: '700', fontSize: '1.1rem' }}>Belum ada sensor aktif.</p>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', marginTop: '0.5rem' }}>Daftarkan alat melalui menu Registrasi IoT untuk memulai monitoring.</p>
+                    <Button
+                        onClick={() => { setEditingSensor(null); setShowModal(true); }}
+                        style={{ marginTop: '1.5rem', padding: '0.8rem 2rem' }}
+                    >
+                        + REGISTRASI SEKARANG
+                    </Button>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {sensors.map(sensor => (
-                        <div key={sensor.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                    {sensors.map((sensor, index) => (
+                        <div
+                            key={sensor.id}
+                            className={`animate-stagger-${Math.min(index + 1, 5)}`}
+                            style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}
+                        >
                             <SensorCard
                                 sensor={sensor}
                                 onEdit={() => handleEditSensor(sensor)}
@@ -172,13 +185,13 @@ const IoTMonitoring = () => {
                     ))}
                 </div>
             )}
-        </>
+        </div>
     );
 
     return (
-        <div className="container" style={{ marginTop: '2rem', paddingBottom: '4rem' }}>
+        <div className="mobile-container animate-fade-in" style={{ paddingBottom: '90px' }}>
             {/* Header with Back Button */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div className="animate-stagger-1" style={{ marginBottom: '2.5rem' }}>
                 <button
                     onClick={() => {
                         if (view === 'menu') {
@@ -187,30 +200,67 @@ const IoTMonitoring = () => {
                             setView('menu');
                         }
                     }}
+                    className="scale-hover"
                     style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#2e7d32',
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        color: 'var(--color-primary-dark)',
+                        padding: '0.7rem 1.4rem',
+                        fontSize: '0.85rem',
+                        marginBottom: '1.5rem',
+                        border: '1.5px solid var(--color-primary-glow)',
+                        borderRadius: '14px',
                         cursor: 'pointer',
-                        fontSize: '0.9rem',
+                        fontWeight: '800',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 0',
-                        marginBottom: '1rem'
+                        gap: '0.6rem',
+                        boxShadow: 'var(--shadow-soft)',
+                        transition: 'all 0.3s ease'
                     }}
                 >
-                    ← Kembali {view === 'menu' ? 'ke Dashboard' : 'ke Menu IoT'}
+                    <span style={{ fontSize: '1.2rem' }}>←</span>
+                    {view === 'menu' ? 'KEMBALI KE DASHBOARD' : 'KEMBALI KE MENU IOT'}
                 </button>
-                <h1 style={{ fontSize: '1.5rem', margin: 0 }}>📊 Monitoring & Histori</h1>
-                <p style={{ color: '#666', fontSize: '0.9rem', margin: '0.5rem 0 0 0' }}>
-                    {view === 'menu'
-                        ? 'Pilih layanan IoT TaniPintar'
-                        : 'Pantau sensor dan data lahan secara real-time'}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '16px',
+                        background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '1.5rem',
+                        boxShadow: 'var(--shadow-glow)'
+                    }}>📡</div>
+                    <div>
+                        <h1 style={{
+                            fontSize: '1.8rem',
+                            margin: 0,
+                            color: 'var(--color-text)',
+                            fontWeight: '900',
+                            letterSpacing: '-0.8px',
+                            lineHeight: '1.1'
+                        }}>
+                            Layanan IoT
+                        </h1>
+                        <p style={{
+                            color: 'var(--color-text-light)',
+                            fontSize: '0.95rem',
+                            margin: '4px 0 0 0',
+                            fontWeight: '600'
+                        }}>
+                            {view === 'menu'
+                                ? 'Pusat Kendali Perangkat Lapangan'
+                                : 'Monitoring Data Lahan Terintegrasi'}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            {view === 'menu' ? renderMenu() : renderMonitoring()}
+            <div>
+                {view === 'menu' ? renderMenu() : renderMonitoring()}
+            </div>
 
             {showModal && (
                 <AddSensorModal
@@ -219,9 +269,8 @@ const IoTMonitoring = () => {
                     onAdded={() => {
                         fetchSensors();
                         if (editingSensor) {
-                            handleCloseModal(); // Close immediately if editing
+                            handleCloseModal();
                         }
-                        // If adding, stay open for token (handled inside modal content usually, but logic in modal was to show token)
                     }}
                 />
             )}

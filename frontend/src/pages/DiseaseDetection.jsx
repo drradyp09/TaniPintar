@@ -65,76 +65,74 @@ const DiseaseDetection = () => {
     };
 
     return (
-        <div style={{
+        <div className="animate-fade-in" style={{
             minHeight: '100vh',
-            background: 'linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%)',
             padding: '1rem'
         }}>
             {/* Mobile Container */}
-            <div style={{
-                maxWidth: '480px',
-                margin: '0 auto'
-            }}>
+            <div className="mobile-container">
                 {/* Header */}
-                <div style={{
+                <div className="glass-card animate-stagger-1" style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '1rem',
-                    marginBottom: '1rem',
-                    background: 'white',
-                    padding: '1rem',
-                    borderRadius: '16px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    marginBottom: '1.2rem',
+                    padding: '1.2rem',
                 }}>
                     <button
                         onClick={handleBack}
+                        className="scale-hover"
                         style={{
-                            background: '#f1f5f9',
+                            background: 'rgba(46, 125, 50, 0.1)',
                             border: 'none',
-                            borderRadius: '50%',
-                            width: '40px',
-                            height: '40px',
+                            borderRadius: '12px',
+                            width: '44px',
+                            height: '44px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
-                            fontSize: '1.2rem'
+                            fontSize: '1.2rem',
+                            color: 'var(--color-primary)',
+                            border: '1px solid var(--color-primary-glow)'
                         }}
                     >
-                        ⬅️
+                        ←
                     </button>
                     <h1 style={{
-                        fontSize: '1.25rem',
+                        fontSize: '1.5rem',
                         margin: 0,
-                        color: '#2d3748',
-                        fontWeight: '700'
+                        color: 'var(--color-text)',
+                        fontWeight: '800',
+                        letterSpacing: '-0.5px'
                     }}>
-                        Plant Detection
+                        Analisis Daun & AI
                     </h1>
                 </div>
 
                 {/* Mode Selector */}
-                <div style={{
+                <div className="glass-card animate-stagger-2" style={{
                     display: 'flex',
-                    background: '#e2e8f0',
-                    padding: '4px',
-                    borderRadius: '12px',
-                    marginBottom: '1.5rem'
+                    background: 'rgba(226, 232, 240, 0.5)',
+                    padding: '6px',
+                    borderRadius: '16px',
+                    marginBottom: '1.8rem',
+                    backdropFilter: 'blur(8px)'
                 }}>
                     <button
                         onClick={() => { setMode('disease'); setResult(null); }}
                         style={{
                             flex: 1,
-                            padding: '0.75rem',
+                            padding: '0.85rem',
                             border: 'none',
-                            borderRadius: '10px',
-                            background: mode === 'disease' ? 'white' : 'transparent',
-                            color: mode === 'disease' ? '#2e7d32' : '#718096',
+                            borderRadius: '12px',
+                            background: mode === 'disease' ? 'var(--color-primary)' : 'transparent',
+                            color: mode === 'disease' ? 'white' : 'var(--color-text-light)',
                             fontWeight: '700',
-                            fontSize: '0.9rem',
+                            fontSize: '0.95rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: mode === 'disease' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: mode === 'disease' ? '0 4px 12px var(--color-primary-glow)' : 'none'
                         }}
                     >
                         🔍 Deteksi Penyakit
@@ -143,16 +141,16 @@ const DiseaseDetection = () => {
                         onClick={() => { setMode('chlorophyll'); setResult(null); }}
                         style={{
                             flex: 1,
-                            padding: '0.75rem',
+                            padding: '0.85rem',
                             border: 'none',
-                            borderRadius: '10px',
-                            background: mode === 'chlorophyll' ? 'white' : 'transparent',
-                            color: mode === 'chlorophyll' ? '#2e7d32' : '#718096',
+                            borderRadius: '12px',
+                            background: mode === 'chlorophyll' ? 'var(--color-primary)' : 'transparent',
+                            color: mode === 'chlorophyll' ? 'white' : 'var(--color-text-light)',
                             fontWeight: '700',
-                            fontSize: '0.9rem',
+                            fontSize: '0.95rem',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: mode === 'chlorophyll' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none'
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            boxShadow: mode === 'chlorophyll' ? '0 4px 12px var(--color-primary-glow)' : 'none'
                         }}
                     >
                         🌿 Kadar Klorofil
@@ -160,37 +158,38 @@ const DiseaseDetection = () => {
                 </div>
 
                 {/* Main Content */}
-                <div style={{
-                    background: 'white',
-                    borderRadius: '20px',
+                <div className="glass-card animate-stagger-3" style={{
                     padding: '1.5rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    marginBottom: '1.5rem'
                 }}>
                     {!previewUrl ? (
                         <div
                             onClick={handleCameraClick}
+                            className="scale-hover"
                             style={{
-                                height: '240px',
-                                border: '2px dashed #cbd5e0',
+                                height: '260px',
+                                border: '2px dashed var(--color-primary-light)',
                                 borderRadius: '16px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: '1rem',
-                                color: '#718096',
+                                gap: '1.2rem',
+                                color: 'var(--color-text-light)',
                                 cursor: 'pointer',
-                                background: '#f8fafc'
+                                background: 'rgba(76, 175, 80, 0.03)'
                             }}
                         >
-                            <div style={{ fontSize: '3rem' }}>📸</div>
-                            <p style={{ margin: 0, fontWeight: '600' }}>
-                                {mode === 'disease' ? 'Foto Daun Bergejala' : 'Foto Daun Untuk Klorofil'}
-                            </p>
-                            <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7 }}>
-                                Gunakan kamera untuk hasil terbaik
-                            </p>
+                            <div style={{ fontSize: '3.5rem' }}>📸</div>
+                            <div>
+                                <p style={{ margin: '0 0 0.4rem 0', fontWeight: '800', color: 'var(--color-text)', fontSize: '1.1rem' }}>
+                                    {mode === 'disease' ? 'Buka Kamera Daun' : 'Ukur Kadar Klorofil'}
+                                </p>
+                                <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.8, fontWeight: '500' }}>
+                                    Ambil foto secara closeup dan jelas
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         <div style={{ position: 'relative' }}>
@@ -200,9 +199,10 @@ const DiseaseDetection = () => {
                                 style={{
                                     width: '100%',
                                     borderRadius: '16px',
-                                    maxHeight: '400px',
+                                    maxHeight: '440px',
                                     objectFit: 'cover',
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                    boxShadow: 'var(--shadow-soft)',
+                                    display: 'block'
                                 }}
                             />
                             <button
@@ -214,16 +214,21 @@ const DiseaseDetection = () => {
                                 }}
                                 style={{
                                     position: 'absolute',
-                                    top: '10px',
-                                    right: '10px',
-                                    background: 'rgba(255,255,255,0.9)',
+                                    top: '12px',
+                                    right: '12px',
+                                    background: 'var(--color-white)',
+                                    color: 'var(--color-error)',
                                     border: 'none',
                                     borderRadius: '50%',
-                                    width: '32px',
-                                    height: '32px',
+                                    width: '36px',
+                                    height: '36px',
                                     cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                    fontSize: '1.2rem',
+                                    fontWeight: 'bold',
+                                    boxShadow: 'var(--shadow-soft)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
                                 }}
                             >
                                 ✕
@@ -244,71 +249,71 @@ const DiseaseDetection = () => {
                         <button
                             onClick={handleAnalyze}
                             disabled={loading}
+                            className="btn"
                             style={{
-                                marginTop: '1.5rem',
+                                marginTop: '1.8rem',
                                 width: '100%',
+                                fontSize: '1.1rem',
                                 padding: '1rem',
-                                borderRadius: '12px',
-                                border: 'none',
-                                background: 'linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%)',
-                                color: 'white',
-                                fontWeight: '700',
-                                fontSize: '1rem',
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                                boxShadow: '0 4px 10px rgba(46, 125, 50, 0.3)',
-                                opacity: loading ? 0.7 : 1
+                                letterSpacing: '0.5px'
                             }}
                         >
-                            {loading ? 'Menganalisis...' : 'Analisis Sekarang'}
+                            {loading ? (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    Memproses AI...
+                                </span>
+                            ) : 'Mulai Analisis Sekarang'}
                         </button>
                     )}
 
                     {result && (
-                        <div style={{
+                        <div className="animate-fade-in" style={{
                             marginTop: '2rem',
                             textAlign: 'left',
-                            padding: '1.25rem',
+                            padding: '1.5rem',
                             borderRadius: '16px',
-                            background: '#f0fff4',
-                            border: '1px solid #c6f6d5'
+                            background: 'rgba(76, 175, 80, 0.05)',
+                            border: '1px solid var(--color-primary-glow)'
                         }}>
                             <h3 style={{
-                                color: '#276749',
-                                margin: '0 0 0.5rem 0',
+                                color: 'var(--color-primary-dark)',
+                                margin: '0 0 1rem 0',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '0.5rem'
+                                gap: '0.6rem',
+                                fontWeight: '800'
                             }}>
-                                📋 Hasil {mode === 'disease' ? 'Analisis' : 'Pengukuran'}
+                                📋 Hasil {mode === 'disease' ? 'Analisis AI' : 'Pengukuran SPAD'}
                             </h3>
 
                             {mode === 'disease' ? (
                                 <>
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <div style={{ fontSize: '0.85rem', color: '#4a5568' }}>Penyakit Terdeteksi:</div>
-                                        <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#2d3748' }}>
+                                    <div style={{ marginBottom: '1.2rem' }}>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', fontWeight: '600', marginBottom: '0.2rem' }}>Penyakit Terdeteksi:</div>
+                                        <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--color-text)', letterSpacing: '-0.3px' }}>
                                             {result.name}
                                         </div>
                                     </div>
 
-                                    <div style={{ marginBottom: '1rem' }}>
-                                        <div style={{ fontSize: '0.85rem', color: '#4a5568' }}>Keyakinan Model:</div>
+                                    <div style={{ marginBottom: '1.2rem' }}>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', fontWeight: '600' }}>Tingkat Keyakinan:</div>
                                         <div style={{
                                             width: '100%',
-                                            height: '8px',
-                                            background: '#e2e8f0',
-                                            borderRadius: '4px',
-                                            marginTop: '4px',
-                                            overflow: 'hidden'
+                                            height: '10px',
+                                            background: 'rgba(226, 232, 240, 0.8)',
+                                            borderRadius: '5px',
+                                            marginTop: '8px',
+                                            overflow: 'hidden',
+                                            boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)'
                                         }}>
                                             <div style={{
                                                 width: `${result.confidence * 100}%`,
                                                 height: '100%',
-                                                background: '#38a169',
-                                                borderRadius: '4px'
+                                                background: 'linear-gradient(90deg, var(--color-primary-light), var(--color-primary))',
+                                                borderRadius: '5px'
                                             }}></div>
                                         </div>
-                                        <div style={{ textAlign: 'right', fontSize: '0.75rem', marginTop: '2px', color: '#718096' }}>
+                                        <div style={{ textAlign: 'right', fontSize: '0.8rem', marginTop: '6px', color: 'var(--color-primary)', fontWeight: '700' }}>
                                             {(result.confidence * 100).toFixed(1)}%
                                         </div>
                                     </div>
@@ -318,27 +323,29 @@ const DiseaseDetection = () => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    padding: '1rem 0',
-                                    background: 'white',
-                                    borderRadius: '12px',
-                                    marginBottom: '1rem',
-                                    border: '1px solid #e2e8f0'
+                                    padding: '1.5rem 0',
+                                    background: 'var(--color-white)',
+                                    borderRadius: '16px',
+                                    marginBottom: '1.2rem',
+                                    boxShadow: 'var(--shadow-soft)',
+                                    border: '1px solid #EDF2F7'
                                 }}>
-                                    <div style={{ fontSize: '0.9rem', color: '#718096' }}>Estimasi Kadar Klorofil</div>
-                                    <div style={{ fontSize: '3rem', fontWeight: '900', color: '#2e7d32' }}>
+                                    <div style={{ fontSize: '0.95rem', color: 'var(--color-text-light)', fontWeight: '600' }}>Estimasi Kadar Klorofil</div>
+                                    <div style={{ fontSize: '3.5rem', fontWeight: '900', color: 'var(--color-primary)', margin: '0.4rem 0' }}>
                                         {result.value}
                                     </div>
-                                    <div style={{ fontSize: '0.8rem', color: '#4a5568', fontWeight: '600' }}>
+                                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', fontWeight: '700' }}>
                                         {result.unit}
                                     </div>
                                     <div style={{
-                                        marginTop: '0.5rem',
-                                        padding: '4px 12px',
+                                        marginTop: '0.8rem',
+                                        padding: '6px 16px',
                                         borderRadius: '20px',
-                                        background: result.status === 'Normal' ? '#c6f6d5' : '#fed7d7',
-                                        color: result.status === 'Normal' ? '#22543d' : '#822727',
-                                        fontSize: '0.75rem',
-                                        fontWeight: '700'
+                                        background: result.status === 'Normal' ? 'rgba(76, 175, 80, 0.1)' : 'rgba(229, 57, 53, 0.1)',
+                                        color: result.status === 'Normal' ? 'var(--color-primary-dark)' : 'var(--color-error)',
+                                        fontSize: '0.8rem',
+                                        fontWeight: '800',
+                                        border: '1px solid currentColor'
                                     }}>
                                         Status: {result.status}
                                     </div>
@@ -346,28 +353,30 @@ const DiseaseDetection = () => {
                             )}
 
                             <div style={{
-                                background: 'white',
-                                padding: '1rem',
-                                borderRadius: '12px',
-                                marginTop: '1rem',
-                                borderLeft: '4px solid #38a169'
+                                background: 'var(--color-white)',
+                                padding: '1.2rem',
+                                borderRadius: '14px',
+                                marginTop: '1.2rem',
+                                borderLeft: '5px solid var(--color-primary)',
+                                boxShadow: 'var(--shadow-soft)'
                             }}>
-                                <div style={{ fontWeight: '700', fontSize: '0.9rem', color: '#2d3748', marginBottom: '0.25rem' }}>
-                                    💡 Rekomendasi:
+                                <div style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--color-text)', marginBottom: '0.4rem' }}>
+                                    💡 Rekomendasi Tindakan:
                                 </div>
-                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#4a5568', lineHeight: '1.4' }}>
+                                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--color-text-light)', lineHeight: '1.5', fontWeight: '500' }}>
                                     {result.recommendation}
                                 </p>
                             </div>
 
                             <div style={{
-                                marginTop: '1rem',
-                                fontSize: '0.7rem',
-                                color: '#a0aec0',
+                                marginTop: '1.2rem',
+                                fontSize: '0.75rem',
+                                color: 'var(--color-text-light)',
                                 textAlign: 'center',
-                                fontStyle: 'italic'
+                                fontStyle: 'italic',
+                                opacity: 0.7
                             }}>
-                                Model: {result.model_info} (v1.0)
+                                Analisis menggunakan {result.model_info}
                             </div>
                         </div>
                     )}
@@ -375,29 +384,28 @@ const DiseaseDetection = () => {
 
                 {/* Info Section */}
                 {!result && (
-                    <div style={{
-                        marginTop: '1.5rem',
-                        padding: '1rem',
-                        borderRadius: '16px',
-                        background: 'rgba(255,255,255,0.6)',
-                        border: '1px solid rgba(255,255,255,0.8)'
+                    <div className="glass-card animate-stagger-2" style={{
+                        marginTop: '1.8rem',
+                        padding: '1.2rem',
+                        background: 'rgba(255,255,255,0.4)'
                     }}>
-                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#4a5568' }}>
+                        <h4 style={{ margin: '0 0 0.8rem 0', fontSize: '1rem', color: 'var(--color-text)', fontWeight: '700' }}>
                             Tips Pengambilan Gambar:
                         </h4>
                         <ul style={{
                             margin: 0,
                             paddingLeft: '1.2rem',
-                            fontSize: '0.80rem',
-                            color: '#718096',
+                            fontSize: '0.85rem',
+                            color: 'var(--color-text-light)',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '0.4rem',
-                            textAlign: 'left'
+                            gap: '0.6rem',
+                            textAlign: 'left',
+                            fontWeight: '500'
                         }}>
-                            <li>Pastikan cahaya terang dan merata.</li>
-                            <li>Ambil foto daun secara tegak lurus (bird's eye view).</li>
-                            <li>{mode === 'disease' ? 'Pastikan bagian yang sakit terlihat jelas.' : 'Pilih daun yang paling sehat/representatif.'}</li>
+                            <li>Pastikan pencahayaan terang dan tidak ada bayangan kuat.</li>
+                            <li>Posisikan daun secara mendatar dan sejajar dengan lensa.</li>
+                            <li>{mode === 'disease' ? 'Fokuskan pada bagian daun yang mengalami gejala/bercak.' : 'Ambil bagian daun yang paling representatif untuk pengukuran.'}</li>
                         </ul>
                     </div>
                 )}

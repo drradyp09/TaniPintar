@@ -140,263 +140,303 @@ const AddSensorModal = ({ onClose, onAdded, sensorToEdit = null }) => {
     };
 
     return (
-        <div style={{
+        <div className="animate-fade-in" style={{
             position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 2000,
-            padding: '1rem',
+            padding: '1.5rem',
             overflowY: 'auto'
         }}>
-            <div className="card" style={{
+            <div className="glass-card" style={{
                 width: '100%',
-                maxWidth: '500px',
-                maxHeight: '95vh',
+                maxWidth: '520px',
+                maxHeight: '90vh',
                 overflowY: 'auto',
-                margin: '1rem 0'
+                margin: 'auto',
+                padding: '2.5rem',
+                background: 'rgba(255, 255, 255, 0.95)',
+                border: '1px solid var(--color-primary-glow)',
+                boxShadow: 'var(--shadow-glow)'
             }}>
-                <h3 className="mb-4">{sensorToEdit ? 'Edit Sensor' : 'Tambah Sensor Baru'}</h3>
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{
+                        fontSize: '1.6rem',
+                        fontWeight: '800',
+                        color: 'var(--color-primary-dark)',
+                        margin: 0,
+                        letterSpacing: '-0.5px'
+                    }}>
+                        {sensorToEdit ? '🔧 Perbarui Perangkat' : '🚀 Registrasi IoT Baru'}
+                    </h3>
+                    <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: '500' }}>
+                        Konfigurasikan detail perangkat datalogger Anda
+                    </p>
+                </div>
 
                 {!token ? (
-                    <form onSubmit={handleSubmit}>
-                        {error && <div style={{ color: '#d32f2f', marginBottom: '1rem', padding: '0.75rem', background: '#ffebee', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</div>}
+                    <form onSubmit={handleSubmit} className="animate-stagger-1">
+                        {error && (
+                            <div className="animate-fade-in" style={{
+                                color: 'var(--color-error)',
+                                marginBottom: '1.5rem',
+                                padding: '0.8rem',
+                                background: 'rgba(211, 47, 47, 0.05)',
+                                borderRadius: '10px',
+                                fontSize: '0.85rem',
+                                fontWeight: '700',
+                                border: '1px solid rgba(211, 47, 47, 0.1)',
+                                textAlign: 'center'
+                            }}>
+                                ⚠️ {error}
+                            </div>
+                        )}
 
                         <Input
-                            label="Device ID (Serial Number)"
+                            label="Device ID / Serial Number"
                             name="device_id"
+                            placeholder="Contoh: SN-2024-XX"
                             value={formData.device_id}
                             onChange={(e) => setFormData({ ...formData, device_id: e.target.value })}
                             required
-                            disabled={!!sensorToEdit} // Disable Device ID when editing
+                            disabled={!!sensorToEdit}
                         />
                         <Input
-                            label="Nama Lokasi (Label)"
+                            label="Nama Lokasi / Label Alat"
                             name="name"
+                            placeholder="Contoh: Lahan Bawang Selatan"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             required
                         />
 
-                        {/* GPS Location with Map */}
-                        <div style={{ marginBottom: '1.25rem' }}>
+                        {/* GPS Location with Map Picker */}
+                        <div style={{ marginBottom: '1.5rem' }}>
                             <label style={{
                                 display: 'block',
-                                marginBottom: '0.5rem',
-                                fontWeight: '600',
-                                color: '#2d3748',
+                                marginBottom: '0.6rem',
+                                fontWeight: '800',
+                                color: 'var(--color-text)',
                                 fontSize: '0.9rem'
                             }}>
-                                Lokasi GPS (Opsional)
+                                LOKASI GEOGRAFIS (OPSIONAL)
                             </label>
 
                             {!showMap ? (
                                 <div style={{
-                                    border: '2px solid #e2e8f0',
-                                    borderRadius: '12px',
-                                    padding: '1rem',
-                                    background: '#f7fafc'
+                                    border: '1.5px dashed var(--color-primary-glow)',
+                                    borderRadius: '14px',
+                                    padding: '1.2rem',
+                                    background: 'rgba(248, 250, 252, 0.5)',
+                                    textAlign: 'center'
                                 }}>
-                                    <p style={{ fontSize: '0.85rem', color: '#718096', margin: '0 0 0.75rem 0' }}>
-                                        {formData.latitude ? 'Lokasi terpilih: ' + formData.latitude.toFixed(6) + ', ' + formData.longitude.toFixed(6) : 'Pilih lokasi sensor pada peta'}
-                                    </p>
-                                    <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
+                                    {formData.latitude ? (
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--color-primary-dark)', fontWeight: '800' }}>
+                                                📍 {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                                            </div>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-light)', margin: '4px 0 0 0' }}>Lokasi saat ini telah terkunci</p>
+                                        </div>
+                                    ) : (
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', margin: '0 0 1rem 0', fontWeight: '500' }}>
+                                            Tentukan titik pemasangan alat untuk visualisasi peta.
+                                        </p>
+                                    )}
+                                    <div style={{ display: 'flex', gap: '0.8rem', flexDirection: 'column' }}>
                                         <button
                                             type="button"
                                             onClick={() => setShowMap(true)}
+                                            className="btn"
                                             style={{
-                                                padding: '0.75rem 1rem',
-                                                background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                color: 'white',
-                                                fontSize: '0.9rem',
-                                                cursor: 'pointer',
-                                                fontWeight: '600',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '0.5rem'
+                                                padding: '0.75rem',
+                                                fontSize: '0.85rem'
                                             }}
                                         >
-                                            🗺️ {formData.latitude ? 'Ubah Lokasi' : 'Pilih di Peta'}
+                                            🗺️ {formData.latitude ? 'UBAH POSISI DI PETA' : 'PILIH POSISI DI PETA'}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={handleGetCurrentLocation}
+                                            className="scale-hover"
                                             style={{
-                                                padding: '0.75rem 1rem',
-                                                background: 'white',
-                                                border: '2px solid #4caf50',
-                                                borderRadius: '8px',
-                                                color: '#2e7d32',
-                                                fontSize: '0.9rem',
+                                                padding: '0.75rem',
+                                                background: 'var(--color-white)',
+                                                border: '2px solid var(--color-primary)',
+                                                borderRadius: '10px',
+                                                color: 'var(--color-primary)',
+                                                fontSize: '0.85rem',
                                                 cursor: 'pointer',
-                                                fontWeight: '600',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: '0.5rem'
+                                                fontWeight: '800'
                                             }}
                                         >
-                                            📍 Gunakan Lokasi Saya
+                                            📍 GUNAKAN LOKASI SAYA
                                         </button>
                                     </div>
                                 </div>
                             ) : (
-                                <div>
-                                    <MapPicker
-                                        latitude={formData.latitude}
-                                        longitude={formData.longitude}
-                                        onLocationSelect={handleLocationSelect}
-                                    />
-                                    {formData.latitude && formData.longitude && (
-                                        <div style={{
-                                            marginTop: '0.75rem',
-                                            padding: '0.75rem',
-                                            background: '#e8f5e9',
-                                            borderRadius: '8px',
-                                            fontSize: '0.85rem'
-                                        }}>
-                                            <div style={{ fontWeight: '600', color: '#2e7d32', marginBottom: '0.25rem' }}>
-                                                📍 Lokasi Terpilih:
-                                            </div>
-                                            <div style={{ fontFamily: 'monospace', color: '#2d3748' }}>
-                                                Lat: {formData.latitude.toFixed(6)}<br />
-                                                Lng: {formData.longitude.toFixed(6)}
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className="animate-fade-in">
+                                    <div style={{ borderRadius: '14px', overflow: 'hidden', border: '2px solid var(--color-primary-glow)', boxShadow: 'var(--shadow-soft)' }}>
+                                        <MapPicker
+                                            latitude={formData.latitude}
+                                            longitude={formData.longitude}
+                                            onLocationSelect={handleLocationSelect}
+                                        />
+                                    </div>
                                     <p style={{
                                         fontSize: '0.8rem',
-                                        color: '#718096',
-                                        marginTop: '0.5rem',
-                                        fontStyle: 'italic'
+                                        color: 'var(--color-primary-dark)',
+                                        marginTop: '0.8rem',
+                                        fontWeight: '700',
+                                        textAlign: 'center'
                                     }}>
-                                        💡 Klik pada peta untuk memilih lokasi sensor
+                                        💡 Klik/Tap pada peta untuk memindahkan titik.
                                     </p>
                                 </div>
                             )}
                         </div>
 
                         {/* Sensor Parameter Selection */}
-                        <div style={{ marginTop: '1.5rem', marginBottom: '1rem' }}>
+                        <div style={{ marginTop: '2rem', marginBottom: '2rem' }}>
                             <label style={{
                                 display: 'block',
-                                marginBottom: '0.75rem',
-                                fontWeight: '600',
-                                color: '#2d3748'
+                                marginBottom: '0.8rem',
+                                fontWeight: '800',
+                                color: 'var(--color-text)',
+                                fontSize: '0.9rem'
                             }}>
-                                Parameter Sensor yang Tersedia:
+                                KONFIGURASI PARAMETER SENSOR:
                             </label>
 
                             <div style={{
-                                border: '2px solid #e2e8f0',
-                                borderRadius: '12px',
+                                border: '1px solid var(--color-primary-glow)',
+                                borderRadius: '16px',
                                 padding: '1rem',
-                                background: '#f7fafc',
-                                maxHeight: '250px',
-                                overflowY: 'auto'
+                                background: 'rgba(248, 250, 252, 0.3)',
+                                maxHeight: '280px',
+                                overflowY: 'auto',
+                                display: 'grid',
+                                gridTemplateColumns: '1fr',
+                                gap: '0.6rem'
                             }}>
                                 {availableSensors.map(sensor => (
-                                    <div key={sensor.key} style={{
-                                        marginBottom: '0.75rem',
-                                        padding: '0.75rem',
-                                        background: formData.sensor_config[sensor.key] ? '#e8f5e9' : 'white',
-                                        borderRadius: '8px',
-                                        border: formData.sensor_config[sensor.key] ? '2px solid #4caf50' : '1px solid #e2e8f0',
-                                        transition: 'all 0.2s ease'
+                                    <div key={sensor.key} className="scale-hover" style={{
+                                        padding: '0.8rem 1rem',
+                                        background: formData.sensor_config[sensor.key] ? 'rgba(76, 175, 80, 0.08)' : 'var(--color-white)',
+                                        borderRadius: '12px',
+                                        border: formData.sensor_config[sensor.key] ? '2.5px solid var(--color-primary)' : '1px solid rgba(0,0,0,0.05)',
+                                        transition: 'all 0.3s ease',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.8rem'
                                     }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <input
-                                                type="checkbox"
-                                                id={sensor.key}
-                                                checked={!!formData.sensor_config[sensor.key]}
-                                                onChange={() => handleSensorToggle(sensor.key)}
+                                        <input
+                                            type="checkbox"
+                                            id={sensor.key}
+                                            checked={!!formData.sensor_config[sensor.key]}
+                                            onChange={() => handleSensorToggle(sensor.key)}
+                                            style={{
+                                                width: '22px',
+                                                height: '22px',
+                                                cursor: 'pointer',
+                                                accentColor: 'var(--color-primary)'
+                                            }}
+                                        />
+                                        <label
+                                            htmlFor={sensor.key}
+                                            style={{
+                                                flex: 1,
+                                                cursor: 'pointer',
+                                                fontWeight: '800',
+                                                color: formData.sensor_config[sensor.key] ? 'var(--color-primary-dark)' : 'var(--color-text)',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            {sensor.label}
+                                        </label>
+
+                                        {formData.sensor_config[sensor.key] && (
+                                            <select
+                                                value={formData.sensor_config[sensor.key].unit}
+                                                onChange={(e) => handleUnitChange(sensor.key, e.target.value)}
                                                 style={{
-                                                    width: '18px',
-                                                    height: '18px',
+                                                    padding: '0.4rem 0.6rem',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--color-primary-glow)',
+                                                    fontSize: '0.85rem',
+                                                    background: 'var(--color-white)',
                                                     cursor: 'pointer',
-                                                    accentColor: '#4caf50'
-                                                }}
-                                            />
-                                            <label
-                                                htmlFor={sensor.key}
-                                                style={{
-                                                    flex: 1,
-                                                    cursor: 'pointer',
-                                                    fontWeight: formData.sensor_config[sensor.key] ? '600' : '500',
-                                                    color: '#2d3748',
-                                                    fontSize: '0.9rem'
+                                                    fontWeight: '700',
+                                                    color: 'var(--color-primary-dark)'
                                                 }}
                                             >
-                                                {sensor.label}
-                                            </label>
-
-                                            {formData.sensor_config[sensor.key] && (
-                                                <select
-                                                    value={formData.sensor_config[sensor.key].unit}
-                                                    onChange={(e) => handleUnitChange(sensor.key, e.target.value)}
-                                                    style={{
-                                                        padding: '0.25rem 0.5rem',
-                                                        borderRadius: '6px',
-                                                        border: '1px solid #cbd5e0',
-                                                        fontSize: '0.85rem',
-                                                        background: 'white',
-                                                        cursor: 'pointer',
-                                                        fontWeight: '500'
-                                                    }}
-                                                >
-                                                    {sensor.units.map(unit => (
-                                                        <option key={unit} value={unit}>{unit}</option>
-                                                    ))}
-                                                </select>
-                                            )}
-                                        </div>
+                                                {sensor.units.map(unit => (
+                                                    <option key={unit} value={unit}>{unit}</option>
+                                                ))}
+                                            </select>
+                                        )}
                                     </div>
                                 ))}
                             </div>
-
-                            <p style={{
-                                fontSize: '0.8rem',
-                                color: '#718096',
-                                marginTop: '0.5rem',
-                                fontStyle: 'italic'
-                            }}>
-                                Pilih parameter yang tersedia pada datalogger Anda
-                            </p>
                         </div>
 
-                        <div className="mt-4" style={{ display: 'flex', gap: '10px' }}>
-                            <Button type="button" onClick={onClose} style={{ background: '#cbd5e0', color: '#2d3748' }}>Batal</Button>
-                            <Button type="submit">Simpan</Button>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '2.5rem' }}>
+                            <Button type="button" onClick={onClose} style={{ background: 'rgba(226, 232, 240, 0.8)', color: 'var(--color-text)', fontWeight: '700' }}>BATAL</Button>
+                            <Button type="submit" style={{ fontWeight: '900' }}>SIMPAN PERANGKAT</Button>
                         </div>
                     </form>
                 ) : (
-                    <div>
-                        <div style={{ background: '#e8f5e9', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
-                            <p style={{ margin: 0, color: '#2e7d32', fontWeight: 'bold', fontSize: '1.1rem' }}>✅ Registrasi Berhasil!</p>
-                            <p style={{ fontSize: '0.9rem', marginTop: '0.75rem', color: '#2d3748' }}>Simpan Token ini di datalogger Anda:</p>
-                            <code style={{
-                                display: 'block',
-                                wordBreak: 'break-all',
-                                background: '#fff',
-                                padding: '0.75rem',
-                                border: '2px solid #4caf50',
-                                borderRadius: '8px',
-                                marginTop: '0.5rem',
-                                fontFamily: 'monospace',
-                                fontSize: '0.85rem'
-                            }}>
-                                {token}
-                            </code>
+                    <div className="animate-fade-in" style={{ textAlign: 'center' }}>
+                        <div style={{
+                            background: 'rgba(76, 175, 80, 0.05)',
+                            padding: '2rem',
+                            borderRadius: '20px',
+                            marginBottom: '2rem',
+                            border: '1.5px solid var(--color-primary-glow)'
+                        }}>
+                            <div style={{ fontSize: '3.5rem', marginBottom: '1rem' }}>✅</div>
+                            <h4 style={{ margin: 0, color: 'var(--color-primary-dark)', fontWeight: '900', fontSize: '1.4rem' }}>Registrasi Berhasil!</h4>
+                            <p style={{ fontSize: '0.95rem', marginTop: '1rem', color: 'var(--color-text-light)', fontWeight: '500', lineHeight: '1.5' }}>
+                                Gunakan <b>API Token</b> di bawah ini untuk menghubungkan perangkat datalogger Anda ke platform TaniPintar:
+                            </p>
+
+                            <div style={{ position: 'relative', marginTop: '1.5rem' }}>
+                                <code style={{
+                                    display: 'block',
+                                    wordBreak: 'break-all',
+                                    background: 'var(--color-white)',
+                                    padding: '1.2rem',
+                                    border: '2px solid var(--color-primary)',
+                                    borderRadius: '12px',
+                                    fontFamily: 'monospace',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '700',
+                                    color: 'var(--color-primary-dark)',
+                                    textAlign: 'left',
+                                    boxShadow: 'var(--shadow-glow)'
+                                }}>
+                                    {token}
+                                </code>
+                                <div style={{
+                                    marginTop: '1rem',
+                                    padding: '8px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(255, 152, 0, 0.1)',
+                                    color: '#e65100',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '800'
+                                }}>
+                                    ⚠️ PENTING: Salin dan simpan token ini sekarang.
+                                </div>
+                            </div>
                         </div>
-                        <Button onClick={onClose}>Tutup</Button>
+                        <Button onClick={onClose} style={{ width: '100%', padding: '1rem', fontWeight: '900' }}>LANJUT KE DASHBOARD</Button>
                     </div>
                 )}
             </div>
