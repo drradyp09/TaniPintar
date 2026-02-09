@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { AUTH_BASE_URL } from '../apiConfig';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const IrrigationPlanner = () => {
     const navigate = useNavigate();
@@ -27,6 +32,9 @@ const IrrigationPlanner = () => {
     const [waterResult, setWaterResult] = useState(null);
     const [seasonalResult, setSeasonalResult] = useState(null);
     const [calcError, setCalcError] = useState('');
+    const [plantingDate, setPlantingDate] = useState(new Date().toISOString().split('T')[0]);
+    const [areaUnit, setAreaUnit] = useState('m2'); // m2, hektar, are
+    const [areaValue, setAreaValue] = useState(1000);
 
     useEffect(() => {
         fetchMetadata();
@@ -135,6 +143,229 @@ const IrrigationPlanner = () => {
         return soilTextures[formData.soil_type] || null;
     }, [formData.soil_type, soilTextures]);
 
+    // Helper function to calculate dates
+    const calculateChartDates = (startDate, stages) => {
+        const dates = [];
+        let currentDate = new Date(startDate);
+        dates.push(currentDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
+
+        stages.forEach(days => {
+            currentDate = new Date(currentDate);
+            currentDate.setDate(currentDate.getDate() + days);
+            dates.push(currentDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
+        });
+
+        return dates;
+    };
+
+    // Calculate days since planting
+    const daysSincePlanting = useMemo(() => {
+        const today = new Date();
+        const plantDate = new Date(plantingDate);
+        const diffTime = today - plantDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays >= 0 ? diffDays : null;
+    }, [plantingDate]);
+
+    // Generate Kc chart data
+    const kcChartData = useMemo(() => {
+        if (!selectedCrop || !selectedCrop.stages || !selectedCrop.kc) return null;
+
+        const stages = selectedCrop.stages;
+        const kc = selectedCrop.kc;
+
+        // Calculate dates for labels
+        const dateLabels = calculateChartDates(plantingDate, stages);
+
+        // Create data points for smooth curve
+        const data = [];
+
+        // Add initial point
+        data.push(kc[0]);
+
+        // Add points at phase transitions
+        for (let i = 0; i < stages.length; i++) {
+            data.push(kc[i]);
+        }
+
+        return {
+            labels: dateLabels,
+            datasets: [{
+                label: 'Koefisien Kc',
+                data: data,
+                borderColor: '#2E7D32',
+                backgroundColor: 'rgba(46, 125, 50, 0.15)',
+                fill: true,
+                tension: 0,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#2E7D32',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        };
+    }, [selectedCrop, plantingDate]);
+
+    // Custom plugin to draw phase zones
+    const phaseZonesPlugin = {
+        id: 'phaseZones',
+        beforeDatasetsDraw(chart) {
+            if (!selectedCrop) return;
+
+            const { ctx, chartArea: { left, right, top, bottom }, scales: { x } } = chart;
+            const stages = selectedCrop.stages;
+            const phaseNames = selectedCrop.phase_names || ['Inisial', 'Vegetatif', 'Pembungaan', 'Pemasakan'];
+            const phaseColors = [
+                'rgba(76, 175, 80, 0.08)',
+                'rgba(139, 195, 74, 0.08)',
+                'rgba(255, 193, 7, 0.08)',
+                'rgba(255, 152, 0, 0.08)'
+            ];
+
+            ctx.save();
+
+            // Calculate cumulative days for phase boundaries
+            let cumulativeDays = 0;
+            stages.forEach((days, idx) => {
+                const startX = x.getPixelForValue(idx);
+                const endX = x.getPixelForValue(idx + 1);
+
+                // Draw background zone
+                ctx.fillStyle = phaseColors[idx];
+                ctx.fillRect(startX, top, endX - startX, bottom - top);
+
+                // Draw vertical separator line (except for last phase)
+                if (idx < stages.length - 1) {
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(endX, top);
+                    ctx.lineTo(endX, bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                cumulativeDays += days;
+            });
+
+            ctx.restore();
+        },
+        afterDatasetsDraw(chart) {
+            if (!selectedCrop) return;
+
+            const { ctx, chartArea: { left, right, top, bottom }, scales: { x } } = chart;
+            const stages = selectedCrop.stages;
+            const phaseNames = selectedCrop.phase_names || ['Inisial', 'Vegetatif', 'Pembungaan', 'Pemasakan'];
+
+            ctx.save();
+
+            // Draw phase labels at the bottom
+            stages.forEach((days, idx) => {
+                const startX = x.getPixelForValue(idx);
+                const endX = x.getPixelForValue(idx + 1);
+                const centerX = (startX + endX) / 2;
+                const labelY = top - 25; // Position at the top, above the chart
+
+                // Measure text width
+                ctx.font = 'bold 10px Inter, sans-serif';
+                const textWidth = ctx.measureText(phaseNames[idx]).width;
+
+                // Draw background box for label
+                const padding = 6;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fillRect(
+                    centerX - textWidth / 2 - padding,
+                    labelY - 10,
+                    textWidth + padding * 2,
+                    18
+                );
+
+                // Draw border
+                ctx.strokeStyle = '#2e7d32';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(
+                    centerX - textWidth / 2 - padding,
+                    labelY - 10,
+                    textWidth + padding * 2,
+                    18
+                );
+
+                // Draw text
+                ctx.fillStyle = '#2e7d32';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(phaseNames[idx], centerX, labelY);
+            });
+
+            ctx.restore();
+        }
+    };
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            phaseZones: true,
+            tooltip: {
+                backgroundColor: 'rgba(46, 125, 50, 0.9)',
+                titleColor: '#fff',
+                bodyColor: '#fff',
+                padding: 12,
+                borderColor: '#2E7D32',
+                borderWidth: 1,
+                displayColors: false,
+                callbacks: {
+                    title: (context) => context[0].label,
+                    label: (context) => `Kc: ${context.parsed.y}`
+                }
+            }
+        },
+        layout: {
+            padding: {
+                top: 35  // Extra space for phase labels at top
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Hari Setelah Tanam',
+                    font: { weight: 'bold', size: 11 },
+                    color: '#1B5E20'
+                },
+                grid: {
+                    color: 'rgba(0,0,0,0.05)',
+                    drawBorder: false
+                },
+                ticks: {
+                    font: { size: 10 },
+                    color: '#666'
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Koefisien Kc',
+                    font: { weight: 'bold', size: 11 },
+                    color: '#1B5E20'
+                },
+                min: 0,
+                max: 1.2,
+                grid: {
+                    color: 'rgba(0,0,0,0.05)',
+                    drawBorder: false
+                },
+                ticks: {
+                    font: { size: 10 },
+                    color: '#666',
+                    stepSize: 0.2
+                }
+            }
+        }
+    };
+
     // Safety Return: if critical data structure is missing
     if (metadataError) {
         return (
@@ -196,29 +427,136 @@ const IrrigationPlanner = () => {
                 </div>
             </div>
 
-            {/* 1. Crop Selection */}
-            <div className="glass-card" style={{ padding: '1.2rem', marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.8rem', fontWeight: '800', color: 'var(--color-primary-dark)' }}>PILIH KOMODITAS</label>
-                <select
-                    value={formData.crop_type}
-                    onChange={(e) => setFormData(p => ({ ...p, crop_type: e.target.value }))}
-                    style={{
-                        width: '100%', padding: '0.9rem', borderRadius: '16px', border: '2px solid var(--color-primary-glow)',
-                        background: 'white', fontSize: '1rem', fontWeight: '700', outline: 'none'
-                    }}
-                >
-                    {Object.keys(crops).map(key => (
-                        <option key={key} value={key}>{crops[key]?.name || key}</option>
-                    ))}
-                </select>
-            </div>
 
             {/* 2. Crop Characteristics */}
             {selectedCrop && (
                 <div className="animate-fade-in glass-card" style={{ padding: '1.2rem', marginBottom: '1.5rem', background: 'rgba(255, 255, 255, 0.6)', border: '1px dashed var(--color-primary)' }}>
-                    <h3 style={{ fontSize: '0.9rem', margin: '0 0 1rem 0', fontWeight: '900', color: 'var(--color-primary-dark)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        📑 KARAKTERISTIK TANAMAN ({selectedCrop.name?.toUpperCase()})
+                    <h3 style={{ fontSize: '0.9rem', margin: '0 0 1rem 0', fontWeight: '900', color: '#2e7d32', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        🌾 KARAKTERISTIK TANAMAN ({selectedCrop.name?.toUpperCase()})
                     </h3>
+
+                    {/* Crop Selector */}
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: '800', color: '#2e7d32' }}>PILIH KOMODITAS</label>
+                        <select
+                            value={formData.crop_type}
+                            onChange={(e) => setFormData(p => ({ ...p, crop_type: e.target.value }))}
+                            style={{
+                                width: '100%',
+                                padding: '0.8rem',
+                                borderRadius: '12px',
+                                border: '2px solid var(--color-primary-glow)',
+                                background: 'white',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                outline: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {Object.keys(crops).map(key => (
+                                <option key={key} value={key}>{crops[key]?.name || key}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Planting Date Input */}
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: '800', color: '#2e7d32' }}>TANGGAL TANAM</label>
+                        <input
+                            type="date"
+                            value={plantingDate}
+                            onChange={(e) => setPlantingDate(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '0.8rem',
+                                borderRadius: '12px',
+                                border: '2px solid var(--color-primary-glow)',
+                                background: 'white',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                outline: 'none',
+                                cursor: 'pointer'
+                            }}
+                        />
+                        {daysSincePlanting !== null && daysSincePlanting >= 0 && (
+                            <div style={{
+                                marginTop: '0.6rem',
+                                padding: '0.7rem',
+                                background: 'rgba(33, 150, 243, 0.08)',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(33, 150, 243, 0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem'
+                            }}>
+                                <span style={{ fontSize: '1.1rem' }}>📅</span>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: '0.65rem', color: '#1565C0', fontWeight: '700' }}>USIA TANAMAN SAAT INI</p>
+                                    <p style={{ margin: '2px 0 0 0', fontSize: '1rem', fontWeight: '900', color: '#1976D2' }}>
+                                        {daysSincePlanting} Hari
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Field Area Input */}
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: '800', color: '#2e7d32' }}>LUAS LAHAN</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.5rem' }}>
+                            <input
+                                type="number"
+                                value={areaValue}
+                                onChange={(e) => {
+                                    const val = parseFloat(e.target.value) || 0;
+                                    setAreaValue(val);
+                                    // Convert to m2 based on unit
+                                    let m2Value = val;
+                                    if (areaUnit === 'hektar') m2Value = val * 10000;
+                                    else if (areaUnit === 'are') m2Value = val * 100;
+                                    setFormData(p => ({ ...p, area_m2: m2Value }));
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.8rem',
+                                    borderRadius: '12px',
+                                    border: '2px solid var(--color-primary-glow)',
+                                    background: 'white',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '700',
+                                    outline: 'none'
+                                }}
+                                required
+                            />
+                            <select
+                                value={areaUnit}
+                                onChange={(e) => {
+                                    const newUnit = e.target.value;
+                                    setAreaUnit(newUnit);
+                                    // Convert current m2 value to new unit
+                                    let newValue = formData.area_m2;
+                                    if (newUnit === 'hektar') newValue = formData.area_m2 / 10000;
+                                    else if (newUnit === 'are') newValue = formData.area_m2 / 100;
+                                    setAreaValue(newValue);
+                                }}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.8rem',
+                                    borderRadius: '12px',
+                                    border: '2px solid var(--color-primary-glow)',
+                                    background: 'white',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    outline: 'none',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="m2">m²</option>
+                                <option value="are">are</option>
+                                <option value="hektar">hektar</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', marginBottom: '1.2rem' }}>
                         <div style={{ background: 'white', padding: '0.8rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)' }}>
@@ -232,53 +570,94 @@ const IrrigationPlanner = () => {
                             <p style={{ margin: '2px 0 0 0', fontSize: '1rem', fontWeight: '900' }}>{selectedCrop.p_fraction ?? '-'}</p>
                         </div>
                     </div>
+                </div>
+            )}
 
-                    <div style={{ overflowX: 'auto', background: 'white', borderRadius: '14px', border: '1px solid rgba(0,0,0,0.05)', padding: '0.5rem' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.7rem', textAlign: 'center' }}>
-                            <thead>
-                                <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
-                                    <th style={{ padding: '0.6rem', borderBottom: '1px solid #eee' }}>FASE</th>
-                                    <th style={{ padding: '0.6rem', borderBottom: '1px solid #eee' }}>HARI</th>
-                                    <th style={{ padding: '0.6rem', borderBottom: '1px solid #eee' }}>Kc</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {['Inisial', 'Vegetatif', 'Pembungaan', 'Pemasakan'].map((label, idx) => (
-                                    <tr key={idx}>
-                                        <td style={{ padding: '0.6rem', fontWeight: '700' }}>{label}</td>
-                                        <td style={{ padding: '0.6rem' }}>{selectedCrop.stages?.[idx] ?? 0}</td>
-                                        <td style={{ padding: '0.6rem', fontWeight: '900', color: 'var(--color-primary)' }}>{selectedCrop.kc?.[idx] ?? 0}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+            {/* Crop Coefficient Chart */}
+            {selectedCrop && kcChartData && (
+                <div className="glass-card animate-fade-in" style={{
+                    padding: '1.5rem',
+                    marginBottom: '1.5rem',
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    border: '2px solid var(--color-primary-glow)'
+                }}>
+                    <h3 style={{
+                        fontSize: '0.95rem',
+                        margin: '0 0 1.2rem 0',
+                        fontWeight: '900',
+                        color: '#2e7d32',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                    }}>
+                        📊 KURVA KOEFISIEN TANAMAN (Kc)
+                    </h3>
+
+                    <div style={{
+                        height: '280px',
+                        marginBottom: '1.2rem',
+                        background: 'white',
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(0,0,0,0.05)'
+                    }}>
+                        <Line data={kcChartData} options={chartOptions} plugins={[phaseZonesPlugin]} />
+                    </div>
+
+
+
+                    <div style={{
+                        marginTop: '1rem',
+                        padding: '0.8rem',
+                        background: 'rgba(33, 150, 243, 0.05)',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(33, 150, 243, 0.2)'
+                    }}>
+                        <p style={{
+                            margin: 0,
+                            fontSize: '0.7rem',
+                            color: '#1565C0',
+                            fontWeight: '600',
+                            lineHeight: '1.4'
+                        }}>
+                            💡 <strong>Info:</strong> Koefisien Kc menunjukkan kebutuhan air relatif tanaman pada setiap fase pertumbuhan.
+                            Nilai Kc lebih tinggi = kebutuhan air lebih besar.
+                        </p>
                     </div>
                 </div>
             )}
 
-            {/* 3. Soil Selection */}
-            <div className="glass-card" style={{ padding: '1.2rem', marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.8rem', fontWeight: '800', color: 'var(--color-primary-dark)' }}>TEKSTUR TANAH</label>
-                <select
-                    value={formData.soil_type}
-                    onChange={(e) => setFormData(p => ({ ...p, soil_type: e.target.value }))}
-                    style={{
-                        width: '100%', padding: '0.9rem', borderRadius: '16px', border: '2px solid var(--color-primary-glow)',
-                        background: 'white', fontSize: '1rem', fontWeight: '700', outline: 'none'
-                    }}
-                >
-                    {Object.keys(soilTextures).map(key => (
-                        <option key={key} value={key}>{soilTextures[key]?.name || key}</option>
-                    ))}
-                </select>
-            </div>
 
             {/* 4. Soil Characteristics */}
             {selectedSoil && (
                 <div className="animate-fade-in glass-card" style={{ padding: '1.2rem', marginBottom: '2rem', background: 'rgba(232, 245, 233, 0.4)', border: '1px dashed #66bb6a' }}>
                     <h3 style={{ fontSize: '0.9rem', margin: '0 0 1rem 0', fontWeight: '900', color: '#1b5e20', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        🟫 KARAKTERISTIK MEDIA TANAM
+                        🌱 KARAKTERISTIK MEDIA TANAM
                     </h3>
+
+                    {/* Soil Texture Selector */}
+                    <div style={{ marginBottom: '1rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.75rem', fontWeight: '800', color: '#1b5e20' }}>TEKSTUR TANAH</label>
+                        <select
+                            value={formData.soil_type}
+                            onChange={(e) => setFormData(p => ({ ...p, soil_type: e.target.value }))}
+                            style={{
+                                width: '100%',
+                                padding: '0.8rem',
+                                borderRadius: '12px',
+                                border: '2px solid #66bb6a',
+                                background: 'white',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                outline: 'none',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {Object.keys(soilTextures).map(key => (
+                                <option key={key} value={key}>{soilTextures[key]?.name || key}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                         <div style={{ background: 'white', padding: '0.8rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)', textAlign: 'center' }}>
@@ -308,27 +687,6 @@ const IrrigationPlanner = () => {
 
             {/* Input Form */}
             <form onSubmit={handleCalculateWater} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '700', color: 'var(--color-primary-dark)' }}>Usia Tanaman (Hari)</label>
-                        <Input
-                            type="number"
-                            value={formData.age_days}
-                            onChange={(e) => setFormData(p => ({ ...p, age_days: e.target.value }))}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem', fontWeight: '700', color: 'var(--color-primary-dark)' }}>Luas Lahan (m²)</label>
-                        <Input
-                            type="number"
-                            value={formData.area_m2}
-                            onChange={(e) => setFormData(p => ({ ...p, area_m2: e.target.value }))}
-                            required
-                        />
-                    </div>
-                </div>
-
                 <div className="glass-card" style={{ padding: '1.2rem', background: 'rgba(255,255,255,0.4)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <h3 style={{ fontSize: '0.85rem', margin: '0 0 0.5rem 0', fontWeight: '800', color: 'var(--color-primary-dark)', borderBottom: '1px solid var(--color-primary-glow)', paddingBottom: '0.5rem' }}>PARAMETER KOREKSI (ENV)</h3>
 
