@@ -14,7 +14,7 @@
   --color-error: #E53935;
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
-  
+
   /* Shadows & Radius */
   --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
   --shadow-glow: 0 8px 32px rgba(46, 125, 50, 0.15);
@@ -43,6 +43,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -54,6 +55,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -61,18 +63,42 @@ body {
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 0 0 var(--color-primary-glow); }
-  70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+  0% {
+    box-shadow: 0 0 0 0 var(--color-primary-glow);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(46, 125, 50, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
+  }
 }
 
 .animate-fade-in {
   animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-stagger-1 { animation: fadeInUp 0.5s 0.1s both; }
-.animate-stagger-2 { animation: fadeInUp 0.5s 0.2s both; }
-.animate-stagger-3 { animation: fadeInUp 0.5s 0.3s both; }
+.animate-stagger-1 {
+  animation: fadeInUp 0.5s 0.1s both;
+}
+
+.animate-stagger-2 {
+  animation: fadeInUp 0.5s 0.2s both;
+}
+
+.animate-stagger-3 {
+  animation: fadeInUp 0.5s 0.3s both;
+}
+
+.animate-stagger-4 {
+  animation: fadeInUp 0.5s 0.4s both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
 
 /* Components */
 .glass-card {
@@ -168,7 +194,8 @@ body {
   max-width: 500px;
   margin: 0 auto;
   padding: 1.5rem;
-  padding-bottom: 5rem; /* for bottom nav */
+  padding-bottom: 5rem;
+  /* for bottom nav */
 }
 
 /* Micro-interactions */

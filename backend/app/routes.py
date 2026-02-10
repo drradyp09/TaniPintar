@@ -344,6 +344,7 @@ def calculate_water():
     pressure = data.get('pressure')
     solar_rad = data.get('solar_rad')
     t_mean = data.get('t_mean')
+    rainfall = data.get('rainfall', 0)  # Default to 0 if not provided
     
     # If data not provided, try to fetch from the latest sensor data of the user
     if any(v is None for v in [t_min, t_max, humidity, wind_speed]):
@@ -356,6 +357,7 @@ def calculate_water():
             humidity = humidity if humidity is not None else (latest.humidity or 70.0)
             wind_speed = wind_speed if wind_speed is not None else (latest.wind_speed or 2.0)
             pressure = pressure if pressure is not None else (latest.pressure or 101.3)
+            rainfall = rainfall if rainfall is not None else (latest.rainfall or 0)
         else:
             # Fallback defaults for tropics
             t_min = t_min if t_min is not None else 23.0
@@ -376,7 +378,8 @@ def calculate_water():
         float(wind_speed),
         float(pressure),
         solar_rad=float(solar_rad) if solar_rad is not None else None,
-        t_mean=float(t_mean) if t_mean is not None else None
+        t_mean=float(t_mean) if t_mean is not None else None,
+        rainfall=float(rainfall)
     )
     
     return jsonify(result), 200
@@ -422,13 +425,61 @@ def calculate_fertilizer():
     data = request.get_json()
     if not data or not data.get('crop_type') or not data.get('area_m2'):
         return jsonify({'error': 'Missing required fields (crop_type, area_m2)'}), 400
-        
-    result = agri_logic.recommend_fertilizer(
-        data['crop_type'],
-        float(data['area_m2'])
-    )
+    
+    # Check if soil data is provided - use scientific method if available
+    has_soil_data = any(k in data for k in ['soil_n', 'soil_p', 'soil_k', 'target_yield'])
+    
+    if has_soil_data:
+        # Use scientific nutrient balance method
+        result = agri_logic.calculate_fertilizer_scientific(
+            crop_type=data['crop_type'],
+            area_m2=float(data['area_m2']),
+            target_yield=float(data.get('target_yield')) if data.get('target_yield') else None,
+            soil_n_percent=float(data.get('soil_n')) if data.get('soil_n') else None,
+            soil_p_ppm=float(data.get('soil_p')) if data.get('soil_p') else None,
+            soil_k_me=float(data.get('soil_k')) if data.get('soil_k') else None,
+            soil_ph=float(data.get('soil_ph', 6.5)),
+            organic_matter_percent=float(data.get('organic_matter', 2.0))
+        )
+    else:
+        # Fallback to simple area-based method
+        result = agri_logic.recommend_fertilizer(
+            data['crop_type'],
+            float(data['area_m2'])
+        )
     
     if not result:
         return jsonify({'error': 'Crop type not supported'}), 400
         
     return jsonify(result), 200
+
+@auth_bp.route('/agriculture/calculate-fertilizer-multi', methods=['POST'])
+@login_required
+def calculate_fertilizer_multi():
+    """
+    Calculate multiple fertilizer combination options with scoring and ranking
+    """
+    data = request.get_json()
+    if not data or not data.get('crop_type') or not data.get('area_m2'):
+        return jsonify({'error': 'Missing required fields (crop_type, area_m2)'}), 400
+    
+    try:
+        result = agri_logic.calculate_fertilizer_multi_option(
+            crop_type=data['crop_type'],
+            area_m2=float(data['area_m2']),
+            target_yield=float(data.get('target_yield')) if data.get('target_yield') else None,
+            soil_n_percent=float(data.get('soil_n')) if data.get('soil_n') else None,
+            soil_p_ppm=float(data.get('soil_p')) if data.get('soil_p') else None,
+            soil_k_me=float(data.get('soil_k')) if data.get('soil_k') else None,
+            soil_ph=float(data.get('soil_ph', 6.5)),
+            organic_matter_percent=float(data.get('organic_matter', 2.0)),
+            max_options=int(data.get('max_options', 5))
+        )
+        
+        if not result:
+            return jsonify({'error': 'Crop type not supported'}), 400
+            
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

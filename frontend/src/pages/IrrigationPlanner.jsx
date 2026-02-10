@@ -26,7 +26,8 @@ const IrrigationPlanner = () => {
         humidity: 75,
         wind_speed: 1.5,
         pressure: 101.3,
-        solar_rad: 15.0
+        solar_rad: 15.0,
+        rainfall: 0
     });
 
     const [waterResult, setWaterResult] = useState(null);
@@ -736,14 +737,26 @@ const IrrigationPlanner = () => {
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text)' }}>Kelembapan Udara (%)</label>
-                        <Input
-                            type="number"
-                            value={formData.humidity}
-                            onChange={(e) => setFormData(p => ({ ...p, humidity: e.target.value }))}
-                            required
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text)' }}>Kelembapan Udara (%)</label>
+                            <Input
+                                type="number"
+                                value={formData.humidity}
+                                onChange={(e) => setFormData(p => ({ ...p, humidity: e.target.value }))}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text)' }}>Curah Hujan (mm/hari)</label>
+                            <Input
+                                type="number"
+                                step="0.1"
+                                value={formData.rainfall}
+                                onChange={(e) => setFormData(p => ({ ...p, rainfall: e.target.value }))}
+                                required
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -773,20 +786,67 @@ const IrrigationPlanner = () => {
                             <span style={{ fontSize: '0.6rem' }}>Coeff</span>
                         </div>
                         <div style={{ padding: '0.8rem', background: 'rgba(76,175,80,0.05)', borderRadius: '12px' }}>
-                            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '700' }}>ETc</p>
+                            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '700' }}>ETc (Kotor)</p>
                             <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900' }}>{waterResult.etc ?? '0.0'}</p>
                             <span style={{ fontSize: '0.6rem' }}>mm/day</span>
                         </div>
                     </div>
 
+                    {/* Rainfall Info */}
+                    {waterResult.rainfall > 0 && (
+                        <div style={{
+                            padding: '1rem',
+                            background: 'rgba(33, 150, 243, 0.08)',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(33, 150, 243, 0.2)',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', textAlign: 'center' }}>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: '0.7rem', color: '#1565C0', fontWeight: '700' }}>🌧️ CURAH HUJAN</p>
+                                    <p style={{ margin: '4px 0 0 0', fontSize: '1.1rem', fontWeight: '900', color: '#1976D2' }}>
+                                        {waterResult.rainfall} mm/hari
+                                    </p>
+                                </div>
+                                <div>
+                                    <p style={{ margin: 0, fontSize: '0.7rem', color: '#1565C0', fontWeight: '700' }}>💧 EFEKTIF (80%)</p>
+                                    <p style={{ margin: '4px 0 0 0', fontSize: '1.1rem', fontWeight: '900', color: '#1976D2' }}>
+                                        {waterResult.effective_rainfall} mm/hari
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Gross Water Requirement */}
                     <div style={{
-                        padding: '1.5rem', background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
-                        color: 'white', borderRadius: '20px', boxShadow: 'var(--shadow-glow)'
+                        padding: '1.2rem',
+                        background: 'rgba(76,175,80,0.1)',
+                        borderRadius: '16px',
+                        marginBottom: '1rem',
+                        border: '1px dashed #66bb6a'
                     }}>
-                        <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', opacity: 0.9 }}>DEBIT AIR YANG DIBUTUHKAN</p>
+                        <p style={{ margin: '0 0 0.3rem 0', fontSize: '0.75rem', fontWeight: '700', color: '#388e3c', opacity: 0.8 }}>KEBUTUHAN AIR KOTOR (Gross)</p>
+                        <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '900', color: '#2e7d32' }}>
+                            {Math.round(waterResult.water_liters ?? 0).toLocaleString()} <span style={{ fontSize: '1rem' }}>L/hari</span>
+                        </h3>
+                    </div>
+
+                    {/* Net Water Requirement */}
+                    <div style={{
+                        padding: '1.5rem',
+                        background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+                        color: 'white',
+                        borderRadius: '20px',
+                        boxShadow: 'var(--shadow-glow)'
+                    }}>
+                        <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: '600', opacity: 0.9 }}>KEBUTUHAN IRIGASI NETTO (Net)</p>
                         <h2 style={{ margin: 0, fontSize: '2.5rem', fontWeight: '900', letterSpacing: '-1px' }}>
-                            {Math.round(waterResult.water_liters ?? 0).toLocaleString()} <span style={{ fontSize: '1.2rem' }}>Liter/Hari</span>
+                            {Math.round(waterResult.net_water_liters ?? 0).toLocaleString()} <span style={{ fontSize: '1.2rem' }}>Liter/Hari</span>
                         </h2>
+                        {waterResult.rainfall > 0 && waterResult.net_water_liters === 0 && (
+                            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.75rem', opacity: 0.9 }}>✅ Curah hujan mencukupi, tidak perlu irigasi tambahan</p>
+                        )}
                     </div>
                 </div>
             )}
