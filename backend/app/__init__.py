@@ -12,15 +12,24 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key'
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL') or 'sqlite:///tanipintar.db'
+    
+    # Handle PostgreSQL URI compatibility (Render/Heroku often use postgres://)
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url and database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///tanipintar.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
+    
+    # CORS Configuration
+    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
     CORS(app, 
          resources={r"/api/*": {
-             "origins": os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(','),
+             "origins": allowed_origins,
              "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
              "allow_headers": ["Content-Type", "X-Sensor-Token"],
              "supports_credentials": True

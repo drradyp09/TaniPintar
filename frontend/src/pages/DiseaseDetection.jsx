@@ -84,7 +84,6 @@ const DiseaseDetection = () => {
                         className="scale-hover"
                         style={{
                             background: 'rgba(46, 125, 50, 0.1)',
-                            border: 'none',
                             borderRadius: '12px',
                             width: '44px',
                             height: '44px',
