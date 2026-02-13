@@ -4,6 +4,7 @@ import { AUTH_BASE_URL } from '../apiConfig';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import FertilizerOptionCard from '../components/FertilizerOptionCard';
+import PriceTrendChart from '../components/PriceTrendChart';
 
 const FertilizerPlanner = () => {
     const navigate = useNavigate();
@@ -26,7 +27,10 @@ const FertilizerPlanner = () => {
     const [fertilizerResult, setFertilizerResult] = useState(null);
     const [error, setError] = useState('');
     const [showMultiOption, setShowMultiOption] = useState(false);
-    const [expandedOptions, setExpandedOptions] = useState([0]); // Only first option expanded by default
+    const [expandedOptions, setExpandedOptions] = useState([0]);
+    const [trendData, setTrendData] = useState({}); // { 'urea': { current_price: 2500, trend: [...] }, ... }
+    const [loadingTrend, setLoadingTrend] = useState({});
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user') || '{}'));
 
     useEffect(() => {
         fetchCrops();
@@ -93,6 +97,23 @@ const FertilizerPlanner = () => {
         }
     };
 
+    const fetchTrend = async (fertType) => {
+        if (trendData[fertType]) return; // Already fetched
+
+        setLoadingTrend(prev => ({ ...prev, [fertType]: true }));
+        try {
+            const response = await fetch(`${AUTH_BASE_URL}/agriculture/fertilizer-prices/${fertType}/trend`, { credentials: 'include' });
+            if (response.ok) {
+                const data = await response.json();
+                setTrendData(prev => ({ ...prev, [fertType]: data }));
+            }
+        } catch (err) {
+            console.error(`Failed to fetch trend for ${fertType}`);
+        } finally {
+            setLoadingTrend(prev => ({ ...prev, [fertType]: false }));
+        }
+    };
+
     const isScientificResult = fertilizerResult && fertilizerResult.method;
 
     return (
@@ -117,6 +138,32 @@ const FertilizerPlanner = () => {
             >
                 <span>←</span> KEMBALI
             </button>
+
+            {user.role === 'admin' && (
+                <button
+                    onClick={() => navigate('/admin/prices')}
+                    className="scale-hover"
+                    style={{
+                        background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                        color: 'white',
+                        padding: '0.6rem 1.2rem',
+                        fontSize: '0.8rem',
+                        marginBottom: '1.5rem',
+                        border: 'none',
+                        borderRadius: '14px',
+                        fontWeight: '800',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        boxShadow: 'var(--shadow-soft)',
+                        float: 'right'
+                    }}
+                >
+                    ⚙️ KELOLA HARGA
+                </button>
+            )}
+
+            <div style={{ clear: 'both' }}></div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                 <div style={{
@@ -407,6 +454,9 @@ const FertilizerPlanner = () => {
                                         idx={idx}
                                         isExpanded={isExpanded}
                                         onToggle={toggleExpand}
+                                        trendData={trendData}
+                                        loadingTrend={loadingTrend}
+                                        fetchTrend={fetchTrend}
                                     />
                                 );
                             })}
@@ -488,23 +538,69 @@ const FertilizerPlanner = () => {
                                             { name: 'SP-36', sub: 'Fosfat (P)', val: fertilizerResult.fertilizer_total_kg.sp36, color: '#1565c0' },
                                             { name: 'KCl', sub: 'Kalium (K)', val: fertilizerResult.fertilizer_total_kg.kcl, color: '#1565c0' }
                                         ].map((item, idx) => (
-                                            <div key={idx} style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                padding: '1rem',
-                                                background: 'white',
-                                                borderRadius: '16px',
-                                                border: '2px solid rgba(30,136,229,0.2)'
-                                            }}>
-                                                <div style={{ textAlign: 'left' }}>
-                                                    <p style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: item.color }}>{item.name}</p>
-                                                    <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '600' }}>{item.sub}</p>
+                                            <React.Fragment key={idx}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    padding: '1rem',
+                                                    background: 'white',
+                                                    borderRadius: '16px',
+                                                    border: '2px solid rgba(30,136,229,0.2)'
+                                                }}>
+                                                    <div style={{ textAlign: 'left' }}>
+                                                        <p style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: item.color }}>{item.name}</p>
+                                                        <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '600' }}>{item.sub}</p>
+                                                    </div>
+                                                    <h3 style={{ margin: 0, fontWeight: '900', fontSize: '1.3rem' }}>
+                                                        {item.val} <span style={{ fontSize: '0.7rem' }}>kg</span>
+                                                    </h3>
                                                 </div>
-                                                <h3 style={{ margin: 0, fontWeight: '900', fontSize: '1.3rem' }}>
-                                                    {item.val} <span style={{ fontSize: '0.7rem' }}>kg</span>
-                                                </h3>
-                                            </div>
+
+                                                {/* Price Trend Section (Scientific Result) */}
+                                                <div style={{
+                                                    padding: '1rem',
+                                                    background: 'rgba(255,255,255,0.5)',
+                                                    borderRadius: '12px',
+                                                    border: '1px solid rgba(30,136,229,0.1)',
+                                                    marginTop: '-0.5rem',
+                                                    marginBottom: '1rem'
+                                                }}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => fetchTrend(item.name.toLowerCase())}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: 'none',
+                                                            color: '#1565c0',
+                                                            fontSize: '0.75rem',
+                                                            fontWeight: '700',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.4rem',
+                                                            padding: 0
+                                                        }}
+                                                    >
+                                                        📈 {loadingTrend[item.name.toLowerCase()] ? 'Memuat...' : `Lihat Tren Harga ${item.name}`}
+                                                        {trendData[item.name.toLowerCase()]?.change_percent !== undefined && (
+                                                            <span style={{
+                                                                color: trendData[item.name.toLowerCase()].change_percent >= 0 ? '#e53935' : '#4caf50',
+                                                                fontSize: '0.7rem'
+                                                            }}>
+                                                                ({trendData[item.name.toLowerCase()].change_percent >= 0 ? '↑' : '↓'} {Math.abs(trendData[item.name.toLowerCase()].change_percent)}%)
+                                                            </span>
+                                                        )}
+                                                    </button>
+
+                                                    {trendData[item.name.toLowerCase()] && (
+                                                        <PriceTrendChart
+                                                            data={trendData[item.name.toLowerCase()].trend}
+                                                            fertilizerType={item.name}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </React.Fragment>
                                         ))}
                                     </div>
 
@@ -588,21 +684,66 @@ const FertilizerPlanner = () => {
                                         { name: 'SP-36', sub: 'Fosfat (P)', val: fertilizerResult.sp36, color: '#1565c0' },
                                         { name: 'KCl', sub: 'Kalium (K)', val: fertilizerResult.kcl, color: '#1565c0' }
                                     ].map((item, idx) => (
-                                        <div key={idx} style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            padding: '1rem',
-                                            background: 'white',
-                                            borderRadius: '16px',
-                                            border: '1px solid rgba(30,136,229,0.1)'
-                                        }}>
-                                            <div style={{ textAlign: 'left' }}>
-                                                <p style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: item.color }}>{item.name}</p>
-                                                <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '600' }}>{item.sub}</p>
+                                        <React.Fragment key={idx}>
+                                            <div style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                padding: '1rem',
+                                                background: 'white',
+                                                borderRadius: '16px',
+                                                border: '1px solid rgba(30,136,229,0.1)'
+                                            }}>
+                                                <div style={{ textAlign: 'left' }}>
+                                                    <p style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: item.color }}>{item.name}</p>
+                                                    <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--color-text-light)', fontWeight: '600' }}>{item.sub}</p>
+                                                </div>
+                                                <h3 style={{ margin: 0, fontWeight: '900' }}>{item.val} <span style={{ fontSize: '0.7rem' }}>kg</span></h3>
                                             </div>
-                                            <h3 style={{ margin: 0, fontWeight: '900' }}>{item.val} <span style={{ fontSize: '0.7rem' }}>kg</span></h3>
-                                        </div>
+
+                                            {/* Trend Section for Simple Results */}
+                                            <div style={{
+                                                padding: '0.8rem',
+                                                background: 'rgba(255,255,255,0.5)',
+                                                borderRadius: '12px',
+                                                border: '1px solid rgba(30,136,229,0.05)',
+                                                marginTop: '-0.5rem',
+                                                marginBottom: '0.5rem'
+                                            }}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fetchTrend(item.name.toLowerCase())}
+                                                    style={{
+                                                        background: 'transparent',
+                                                        border: 'none',
+                                                        color: '#1565c0',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: '700',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.3rem',
+                                                        padding: 0
+                                                    }}
+                                                >
+                                                    📈 {loadingTrend[item.name.toLowerCase()] ? 'Memuat...' : `Tren Harga ${item.name}`}
+                                                    {trendData[item.name.toLowerCase()]?.change_percent !== undefined && (
+                                                        <span style={{
+                                                            color: trendData[item.name.toLowerCase()].change_percent >= 0 ? '#e53935' : '#4caf50'
+                                                        }}>
+                                                            ({trendData[item.name.toLowerCase()].change_percent >= 0 ? '↑' : '↓'} {Math.abs(trendData[item.name.toLowerCase()].change_percent)}%)
+                                                        </span>
+                                                    )}
+                                                </button>
+
+                                                {trendData[item.name.toLowerCase()] && (
+                                                    <PriceTrendChart
+                                                        data={trendData[item.name.toLowerCase()].trend}
+                                                        fertilizerType={item.name}
+                                                    />
+                                                )}
+                                            </div>
+                                        </React.Fragment>
                                     ))}
                                 </div>
 
@@ -633,10 +774,10 @@ const FertilizerPlanner = () => {
                             <li>Konsultasikan dengan penyuluh pertanian setempat</li>
                         </ul>
                     </div>
-                </div>
+                </div >
             )}
 
-        </div>
+        </div >
     );
 };
 

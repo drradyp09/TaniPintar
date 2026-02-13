@@ -729,12 +729,13 @@ class AgriLogic:
         # 8. Split by growth phase
         phases = self._distribute_by_phase(crop_type, urea_total, sp36_total, kcl_total)
         
-        # 9. Calculate total cost
+        # 9. Calculate total cost using dynamic pricing
         total_cost = (
-            urea_total * self.FERTILIZER_COMPOSITION['urea']['price_per_kg'] +
-            sp36_total * self.FERTILIZER_COMPOSITION['sp36']['price_per_kg'] +
-            kcl_total * self.FERTILIZER_COMPOSITION['kcl']['price_per_kg']
+            urea_total * self.get_current_price('urea') +
+            sp36_total * self.get_current_price('sp36') +
+            kcl_total * self.get_current_price('kcl')
         )
+
         
         return {
             "crop_name": crop['name'],
@@ -971,12 +972,13 @@ class AgriLogic:
                 K_requirement * area_ha
             )
             
-            # Calculate total cost
+            # Calculate total cost using dynamic pricing
             total_cost = sum(
-                amount * self.FERTILIZER_COMPOSITION[fert]['price_per_kg']
+                amount * self.get_current_price(fert)
                 for fert, amount in combo['fertilizers'].items()
                 if amount > 0
             )
+
             
             # Check compatibility
             compatibility = self._check_compatibility(list(combo['fertilizers'].keys()))
@@ -1093,5 +1095,133 @@ class AgriLogic:
                     }
         
         return {'compatible': True}
+    
+    def get_current_price(self, fertilizer_type):
+        """
+        Get current price from database or fallback to static price.
+        Uses caching to avoid repeated database queries.
+        
+        Args:
+            fertilizer_type: Fertilizer identifier (e.g., 'urea', 'sp36')
+        
+        Returns:
+            float: Current price per kg in IDR
+        """
+        try:
+            from ..models import FertilizerPrice
+            from .. import db
+            
+            # Query latest price from database
+            latest_price = FertilizerPrice.query.filter_by(
+                fertilizer_type=fertilizer_type
+            ).order_by(FertilizerPrice.effective_date.desc()).first()
+            
+            if latest_price:
+                return latest_price.price_per_kg
+        except Exception as e:
+            # If database query fails, fall back to static price
+            print(f"Warning: Failed to get price from database: {str(e)}")
+        
+        # Fallback to static price from FERTILIZER_COMPOSITION
+        return self.FERTILIZER_COMPOSITION.get(fertilizer_type, {}).get('price_per_kg', 0)
+    
+    def get_price_trend(self, fertilizer_type, days=30):
+        """
+        Get historical price trend for a fertilizer.
+        
+        Args:
+            fertilizer_type: Fertilizer identifier
+            days: Number of days to look back (default: 30)
+        
+        Returns:
+            dict: Trend data with current price, historical prices, and statistics
+        """
+        try:
+            from ..models import FertilizerPrice
+            from datetime import datetime, timedelta
+            
+            cutoff_date = datetime.utcnow() - timedelta(days=days)
+            
+            # Get all prices within the time window
+            prices = FertilizerPrice.query.filter(
+                FertilizerPrice.fertilizer_type == fertilizer_type,
+                FertilizerPrice.effective_date >= cutoff_date
+            ).order_by(FertilizerPrice.effective_date.asc()).all()
+            
+            if not prices:
+                # No historical data, return current static price
+                current_price = self.get_current_price(fertilizer_type)
+                return {
+                    'fertilizer_type': fertilizer_type,
+                    'current_price': current_price,
+                    'trend': [],
+                    'change_percent': 0,
+                    'avg_price': current_price,
+                    'min_price': current_price,
+                    'max_price': current_price,
+                    'data_points': 0
+                }
+            
+            # Format trend data
+            trend_data = [
+                {
+                    'date': p.effective_date.strftime('%Y-%m-%d'),
+                    'price': p.price_per_kg,
+                    'source': p.source
+                }
+                for p in prices
+            ]
+            
+            # Calculate statistics
+            price_values = [p.price_per_kg for p in prices]
+            current_price = prices[-1].price_per_kg
+            first_price = prices[0].price_per_kg
+            
+            change_percent = 0
+            if first_price > 0:
+                change_percent = ((current_price - first_price) / first_price) * 100
+            
+            return {
+                'fertilizer_type': fertilizer_type,
+                'current_price': current_price,
+                'trend': trend_data,
+                'change_percent': round(change_percent, 2),
+                'avg_price': round(sum(price_values) / len(price_values), 2),
+                'min_price': min(price_values),
+                'max_price': max(price_values),
+                'data_points': len(prices)
+            }
+            
+        except Exception as e:
+            print(f"Warning: Failed to get price trend: {str(e)}")
+            # Return minimal data on error
+            current_price = self.get_current_price(fertilizer_type)
+            return {
+                'fertilizer_type': fertilizer_type,
+                'current_price': current_price,
+                'trend': [],
+                'change_percent': 0,
+                'avg_price': current_price,
+                'data_points': 0
+            }
+    
+    def get_all_current_prices(self):
+        """
+        Get current prices for all fertilizers.
+        
+        Returns:
+            dict: Dictionary of fertilizer types and their current prices
+        """
+        prices = {}
+        for fert_type in self.FERTILIZER_COMPOSITION.keys():
+            prices[fert_type] = {
+                'price_per_kg': self.get_current_price(fert_type),
+                'name': fert_type.upper(),
+                'composition': {
+                    k: v for k, v in self.FERTILIZER_COMPOSITION[fert_type].items()
+                    if k != 'price_per_kg'
+                }
+            }
+        return prices
 
 agri_logic = AgriLogic()

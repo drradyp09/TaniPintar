@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
+import PriceTrendChart from './PriceTrendChart';
 
-const FertilizerOptionCard = ({ option, idx, isExpanded, onToggle }) => {
+const FertilizerOptionCard = ({
+    option,
+    idx,
+    isExpanded,
+    onToggle,
+    trendData = {},
+    loadingTrend = {},
+    fetchTrend
+}) => {
     return (
         <div
             className="glass-card"
@@ -89,18 +98,64 @@ const FertilizerOptionCard = ({ option, idx, isExpanded, onToggle }) => {
                             {Object.entries(option.fertilizers).map(([fert, amount]) => (
                                 <div key={fert} style={{
                                     display: 'flex',
-                                    justifyContent: 'space-between',
-                                    padding: '0.4rem 0.6rem',
+                                    flexDirection: 'column',
+                                    gap: '0.4rem',
                                     background: 'white',
-                                    borderRadius: '6px',
-                                    fontSize: '0.75rem'
+                                    borderRadius: '12px',
+                                    padding: '0.8rem',
+                                    border: '1px solid rgba(0,0,0,0.05)'
                                 }}>
-                                    <span style={{ fontWeight: '700', textTransform: 'uppercase' }}>
-                                        {fert.replace('_', ' ')}
-                                    </span>
-                                    <span style={{ fontWeight: '800', color: '#ff9800' }}>
-                                        {amount} kg
-                                    </span>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        fontSize: '0.75rem'
+                                    }}>
+                                        <span style={{ fontWeight: '700', textTransform: 'uppercase', color: '#333' }}>
+                                            {fert.replace('_', ' ')}
+                                        </span>
+                                        <span style={{ fontWeight: '800', color: '#ff9800' }}>
+                                            {amount} kg
+                                        </span>
+                                    </div>
+
+                                    {/* Trend Button */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            fetchTrend(fert.toLowerCase());
+                                        }}
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: '#2196f3',
+                                            fontSize: '0.65rem',
+                                            fontWeight: '700',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.3rem',
+                                            padding: '0.2rem 0'
+                                        }}
+                                    >
+                                        📈 {loadingTrend[fert.toLowerCase()] ? 'Memuat...' : 'Lihat Tren Harga'}
+                                        {trendData[fert.toLowerCase()]?.change_percent !== undefined && (
+                                            <span style={{
+                                                color: trendData[fert.toLowerCase()].change_percent >= 0 ? '#f44336' : '#4caf50'
+                                            }}>
+                                                ({trendData[fert.toLowerCase()].change_percent >= 0 ? '↑' : '↓'} {Math.abs(trendData[fert.toLowerCase()].change_percent)}%)
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {trendData[fert.toLowerCase()] && (
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <PriceTrendChart
+                                                data={trendData[fert.toLowerCase()].trend}
+                                                fertilizerType={fert.replace('_', ' ')}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

@@ -483,3 +483,95 @@ def calculate_fertilizer_multi():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# --- Fertilizer Price Management Routes ---
+
+@auth_bp.route('/agriculture/fertilizer-prices', methods=['GET'])
+def get_fertilizer_prices():
+    """
+    Get current prices for all fertilizers.
+    Public endpoint - no authentication required.
+    """
+    try:
+        prices = agri_logic.get_all_current_prices()
+        return jsonify(prices), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/agriculture/fertilizer-prices/<fertilizer_type>/trend', methods=['GET'])
+def get_price_trend(fertilizer_type):
+    """
+    Get price trend for a specific fertilizer.
+    Query params: days (default: 30)
+    """
+    try:
+        days = int(request.args.get('days', 30))
+        trend = agri_logic.get_price_trend(fertilizer_type, days=days)
+        return jsonify(trend), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/agriculture/fertilizer-prices', methods=['POST'])
+@login_required
+def update_fertilizer_price():
+    """
+    Update fertilizer price (Admin only).
+    Supports both manual updates and API sync.
+    """
+    # Check if user is admin
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized. Admin access required.'}), 403
+    
+    data = request.get_json()
+    if not data or not data.get('fertilizer_type') or not data.get('price_per_kg'):
+        return jsonify({'error': 'Missing required fields (fertilizer_type, price_per_kg)'}), 400
+    
+    try:
+        from .models import FertilizerPrice
+        from datetime import datetime
+        
+        # Create new price record
+        new_price = FertilizerPrice(
+            fertilizer_type=data['fertilizer_type'],
+            price_per_kg=float(data['price_per_kg']),
+            effective_date=datetime.utcnow(),
+            source=data.get('source', 'manual'),
+            region=data.get('region', 'national'),
+            updated_by=current_user.id,
+            notes=data.get('notes')
+        )
+        
+        db.session.add(new_price)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Price updated successfully',
+            'price': new_price.to_dict()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@auth_bp.route('/agriculture/fertilizer-prices/sync', methods=['POST'])
+@login_required
+def sync_fertilizer_prices():
+    """
+    Sync fertilizer prices from external API (Admin only).
+    This is a placeholder for future API integration.
+    """
+    # Check if user is admin
+    if current_user.role != 'admin':
+        return jsonify({'error': 'Unauthorized. Admin access required.'}), 403
+    
+    try:
+        # TODO: Implement actual API sync logic
+        # For now, return a placeholder response
+        return jsonify({
+            'message': 'API sync not yet implemented',
+            'status': 'pending',
+            'note': 'This endpoint will sync prices from government/market APIs in the future'
+        }), 501  # Not Implemented
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

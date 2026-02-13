@@ -78,3 +78,31 @@ class SensorData(db.Model):
             'wind_speed': self.wind_speed,
             'pressure': self.pressure
         }
+
+class FertilizerPrice(db.Model):
+    """
+    Dynamic fertilizer pricing model with time-series support.
+    Supports both manual updates and API synchronization.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    fertilizer_type = db.Column(db.String(50), nullable=False, index=True)  # 'urea', 'sp36', etc.
+    price_per_kg = db.Column(db.Float, nullable=False)
+    effective_date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    source = db.Column(db.String(100), default='manual')  # 'manual', 'api_sync', 'government', 'initial_seed'
+    region = db.Column(db.String(100), default='national')  # Future: regional pricing support
+    updated_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Admin who updated
+    notes = db.Column(db.Text, nullable=True)  # Optional notes about price change
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'fertilizer_type': self.fertilizer_type,
+            'price_per_kg': self.price_per_kg,
+            'effective_date': self.effective_date.isoformat(),
+            'source': self.source,
+            'region': self.region,
+            'updated_by': self.updated_by,
+            'notes': self.notes,
+            'created_at': self.created_at.isoformat()
+        }

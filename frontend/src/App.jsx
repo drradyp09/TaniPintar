@@ -8,6 +8,7 @@ import DiseaseDetection from './pages/DiseaseDetection';
 import WaterFertilizer from './pages/WaterFertilizer';
 import IrrigationPlanner from './pages/IrrigationPlanner';
 import FertilizerPlanner from './pages/FertilizerPlanner';
+import PriceManagement from './pages/PriceManagement';
 
 function App() {
   // Simple auth check
@@ -18,6 +19,14 @@ function App() {
   const ProtectedRoute = ({ children }) => {
     if (!isAuthenticated()) {
       return <Navigate to="/login" replace />;
+    }
+    return children;
+  };
+
+  const AdminRoute = ({ children }) => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!isAuthenticated() || user.role !== 'admin') {
+      return <Navigate to="/dashboard" replace />;
     }
     return children;
   };
@@ -81,6 +90,15 @@ function App() {
             <ProtectedRoute>
               <FertilizerPlanner />
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/prices"
+          element={
+            <AdminRoute>
+              <PriceManagement />
+            </AdminRoute>
           }
         />
 
