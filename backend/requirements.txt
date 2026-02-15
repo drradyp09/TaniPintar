@@ -1,0 +1,14 @@
+flask
+flask-sqlalchemy
+flask-cors
+flask-login
+requests
+python-dotenv
+python-dateutil
+gunicorn
+psycopg2-binary
+opencv-python-headless
+numpy
+ai-edge-litert
+pillow
+psycopg2-binary

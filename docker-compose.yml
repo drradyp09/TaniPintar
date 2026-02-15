@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: tanipintar-backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=${FLASK_ENV:-production}
+    volumes:
+      - ./backend/instance:/app/instance
+    expose:
+      - "5000"
+    networks:
+      - tanipintar-network
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tanipintar-frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - tanipintar-network
+
+networks:
+  tanipintar-network:
+    driver: bridge
