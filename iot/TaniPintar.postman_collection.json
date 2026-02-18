@@ -1,0 +1,133 @@
+{
+    "info": {
+        "_postman_id": "tanipintar-collection-id",
+        "name": "TaniPintar API",
+        "description": "Collection to test TaniPintar IoT endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Login",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "// No token extraction needed as it uses cookies"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/auth/login",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "auth",
+                        "login"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "2. Register Device",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "var jsonData = pm.response.json();",
+                            "pm.collectionVariables.set(\"sensor_token\", jsonData.token);",
+                            "console.log(\"Sensor Token set to: \" + jsonData.token);"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"device_id\": \"esp32_test_01\",\n    \"name\": \"Postman Test Device\",\n    \"latitude\": -6.200000,\n    \"longitude\": 106.816666\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/auth/sensors/register",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "auth",
+                        "sensors",
+                        "register"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "3. Send Telemetry",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "X-Sensor-Token",
+                        "value": "{{sensor_token}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"temperature\": 28.5,\n    \"humidity\": 75.0,\n    \"soil_ph\": 6.5,\n    \"soil_moisture\": 60.0,\n    \"light_intensity\": 1500,\n    \"rainfall\": 0.0,\n    \"wind_speed\": 3.5,\n    \"pressure\": 1012.0\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/auth/v1/telemetry",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "auth",
+                        "v1",
+                        "telemetry"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://103.196.152.3:8080",
+            "type": "string"
+        }
+    ]
+}
