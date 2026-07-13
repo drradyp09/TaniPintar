@@ -20,7 +20,7 @@ services:
     volumes:
       - backend-instance:/app/instance
     ports:
-      - "8001:5000"
+      - "3001:5000"
     healthcheck:
       test:
         - CMD
@@ -48,7 +48,7 @@ services:
     container_name: tanipintar-frontend
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "3000:80"
     depends_on:
       backend:
         condition: service_healthy
