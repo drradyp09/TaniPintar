@@ -28,9 +28,11 @@ services:
         - -c
         - "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"
       interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
+      timeout: 10s
+      retries: 5
+      # Model preload can take a while on a small VPS; don't mark unhealthy
+      # until the app has had time to finish loading.
+      start_period: 90s
     networks:
       - tanipintar-network
     logging:
