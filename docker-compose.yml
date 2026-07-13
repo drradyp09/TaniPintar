@@ -20,7 +20,7 @@ services:
     volumes:
       - backend-instance:/app/instance
     expose:
-      - "5000"
+      - "7001:5000"
     healthcheck:
       test:
         - CMD
@@ -46,7 +46,7 @@ services:
     container_name: tanipintar-frontend
     restart: unless-stopped
     expose:
-      - "80"
+      - "7000:80"
     depends_on:
       backend:
         condition: service_healthy
