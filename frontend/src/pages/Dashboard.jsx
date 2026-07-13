@@ -74,6 +74,7 @@ const Dashboard = () => {
     };
 
     return (
+        <>
         <div className="animate-fade-in" style={{
             minHeight: '100vh',
             paddingBottom: '90px',
@@ -370,8 +371,9 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+        </div>
 
-            {/* Bottom Navigation Bar */}
+            {/* Bottom Navigation Bar (sibling of the transformed root so `fixed` anchors to the viewport) */}
             <div style={{
                 position: 'fixed',
                 bottom: '15px',
@@ -457,7 +459,7 @@ const Dashboard = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
