@@ -8,7 +8,7 @@
 
 services:
   backend:
-    image: ${REGISTRY:-ghcr.io/purbakawaca/tanipintar}-backend:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/drradyp09/tanipintar}-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
     container_name: tanipintar-backend
@@ -19,7 +19,7 @@ services:
       - FLASK_ENV=${FLASK_ENV:-production}
     volumes:
       - backend-instance:/app/instance
-    expose:
+    ports:
       - "7001:5000"
     healthcheck:
       test:
@@ -40,12 +40,12 @@ services:
         max-file: "3"
 
   frontend:
-    image: ${REGISTRY:-ghcr.io/purbakawaca/tanipintar}-frontend:${IMAGE_TAG:-latest}
+    image: ${REGISTRY:-ghcr.io/drradyp09/tanipintar}-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
     container_name: tanipintar-frontend
     restart: unless-stopped
-    expose:
+    ports:
       - "7000:80"
     depends_on:
       backend:
