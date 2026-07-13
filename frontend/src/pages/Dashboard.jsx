@@ -5,7 +5,6 @@ import { AUTH_BASE_URL } from '../apiConfig';
 const Dashboard = () => {
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const [activeTab, setActiveTab] = useState('home');
 
     const handleLogout = async () => {
         try {
@@ -43,26 +42,6 @@ const Dashboard = () => {
         { icon: '📈', title: 'Weekly report ready', detail: 'Health score improved', time: '3 days ago', status: 'success' }
     ]);
 
-    const menuItems = [
-        { id: 'home', title: 'Home', icon: '🏠', available: true },
-        { id: 'iot', title: 'IoT', icon: '📡', route: '/iot-monitoring', available: true },
-        { id: 'disease-detection', title: 'Plant Detection', icon: '🌿', route: '/disease-detection', available: true },
-        { id: 'water-fertilizer', title: 'Water & Fertilizer', icon: '🧪', route: '/water-fertilizer', available: true },
-        { id: 'chatbot', title: 'Chat TaniPintar', icon: '💬', route: '/chatbot', available: false }
-    ];
-
-    const handleMenuClick = (item) => {
-        if (!item.available) {
-            alert('Fitur ini akan segera hadir!');
-            return;
-        }
-        if (item.id === 'home') {
-            setActiveTab('home');
-        } else {
-            navigate(item.route);
-        }
-    };
-
     const getStatusColor = (status) => {
         const colors = {
             success: '#4CAF50',
@@ -74,10 +53,8 @@ const Dashboard = () => {
     };
 
     return (
-        <>
         <div className="animate-fade-in" style={{
             minHeight: '100vh',
-            paddingBottom: '90px',
             background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(33, 150, 243, 0.03) 100%)'
         }}>
             <div className="mobile-container">
@@ -372,94 +349,6 @@ const Dashboard = () => {
                 </div>
             </div>
         </div>
-
-            {/* Bottom Navigation Bar (sibling of the transformed root so `fixed` anchors to the viewport) */}
-            <div style={{
-                position: 'fixed',
-                bottom: '15px',
-                left: '15px',
-                right: '15px',
-                background: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '24px',
-                border: '1px solid var(--color-primary-glow)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-                zIndex: 1000,
-                maxWidth: '450px',
-                margin: '0 auto'
-            }}>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-around',
-                    padding: '0.6rem 0.4rem'
-                }}>
-                    {menuItems.map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => handleMenuClick(item)}
-                            className={item.available ? "scale-hover" : ""}
-                            style={{
-                                flex: 1,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '0.3rem',
-                                padding: '0.6rem 0',
-                                background: 'none',
-                                border: 'none',
-                                cursor: item.available ? 'pointer' : 'not-allowed',
-                                opacity: item.available ? 1 : 0.4,
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                position: 'relative'
-                            }}
-                        >
-                            <div style={{
-                                fontSize: '1.6rem',
-                                filter: activeTab === item.id ? 'drop-shadow(0 0 8px var(--color-primary-glow))' : 'grayscale(100%)',
-                                transform: activeTab === item.id ? 'translateY(-5px) scale(1.15)' : 'translateY(0) scale(1)',
-                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                            }}>
-                                {item.icon}
-                            </div>
-                            <span style={{
-                                fontSize: '0.65rem',
-                                fontWeight: '800',
-                                color: activeTab === item.id ? 'var(--color-primary-dark)' : 'var(--color-text-light)',
-                                letterSpacing: '0.2px',
-                                textTransform: 'uppercase',
-                                textAlign: 'center',
-                                width: '100%',
-                                display: 'block'
-                            }}>
-                                {item.title}
-                            </span>
-                            {activeTab === item.id && (
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: '0',
-                                    width: '5px',
-                                    height: '5px',
-                                    background: 'var(--color-primary)',
-                                    borderRadius: '50%',
-                                    boxShadow: '0 0 10px var(--color-primary)'
-                                }}></div>
-                            )}
-                            {!item.available && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '4px',
-                                    right: '4px',
-                                    width: '6px',
-                                    height: '6px',
-                                    background: '#f59e0b',
-                                    borderRadius: '50%'
-                                }}></div>
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </>
     );
 };
 

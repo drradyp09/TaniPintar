@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './layouts/AuthLayout';
+import AppLayout from './layouts/AppLayout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -39,68 +40,29 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
+        {/* Authenticated pages share AppLayout, which renders the global bottom nav. */}
         <Route
-          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <AppLayout />
             </ProtectedRoute>
           }
-        />
-
-        <Route
-          path="/iot-monitoring"
-          element={
-            <ProtectedRoute>
-              <IoTMonitoring />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/disease-detection"
-          element={
-            <ProtectedRoute>
-              <DiseaseDetection />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/water-fertilizer"
-          element={
-            <ProtectedRoute>
-              <WaterFertilizer />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/irrigation"
-          element={
-            <ProtectedRoute>
-              <IrrigationPlanner />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/fertilizer"
-          element={
-            <ProtectedRoute>
-              <FertilizerPlanner />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/admin/prices"
-          element={
-            <AdminRoute>
-              <PriceManagement />
-            </AdminRoute>
-          }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/iot-monitoring" element={<IoTMonitoring />} />
+          <Route path="/disease-detection" element={<DiseaseDetection />} />
+          <Route path="/water-fertilizer" element={<WaterFertilizer />} />
+          <Route path="/irrigation" element={<IrrigationPlanner />} />
+          <Route path="/fertilizer" element={<FertilizerPlanner />} />
+          <Route
+            path="/admin/prices"
+            element={
+              <AdminRoute>
+                <PriceManagement />
+              </AdminRoute>
+            }
+          />
+        </Route>
 
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
