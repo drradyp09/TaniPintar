@@ -1,31 +1,72 @@
+# TaniPintar full-stack deployment
+#
+# Two modes:
+#   Local build:  docker compose up -d --build
+#   Registry pull: set IMAGE_TAG + REGISTRY, then `docker compose pull && docker compose up -d`
+#
+# Images are named so CI-pushed tags and local builds line up.
+
 services:
   backend:
+    image: ${REGISTRY:-ghcr.io/purbakawaca/tanipintar}-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
     container_name: tanipintar-backend
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     environment:
       - FLASK_ENV=${FLASK_ENV:-production}
     volumes:
-      - ./backend/instance:/app/instance
+      - backend-instance:/app/instance
     expose:
       - "5000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/health')"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     networks:
       - tanipintar-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
+    image: ${REGISTRY:-ghcr.io/purbakawaca/tanipintar}-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
     container_name: tanipintar-frontend
-    restart: always
-    ports:
-      - "8080:80"
+    restart: unless-stopped
+    expose:
+      - "80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - tanipintar-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  backend-instance:
+    driver: local
 
 networks:
   tanipintar-network:
