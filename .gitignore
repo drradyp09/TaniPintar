@@ -28,3 +28,20 @@ cookies.txt
 .gemini/
 .agent/
 brain/
+
+venv/
+
+# Deep learning: dataset + local env + large model artifacts (keep labels.txt)
+deeplearning/dataset.zip
+deeplearning/dataset/
+deeplearning/venv_train/
+deeplearning/models/*.h5
+deeplearning/models/*.tflite
+deeplearning/models/*.png
+
+# design-sync (claude.ai/design) — staged scripts, build output, machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
