@@ -6,7 +6,7 @@ RUN npm install
 COPY . .
 # Set default API URL for build, but it can be overridden at runtime if we had a config
 # For this setup, we assume Nginx will handle /api proxying
-ENV VITE_API_URL=/api
+ENV VITE_API_URL=https://api-agritani.enviscitech.id/api
 RUN npm run build
 
 # Production stage
