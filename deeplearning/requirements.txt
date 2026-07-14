@@ -1,0 +1,7 @@
+# Training/eval environment (Python 3.12). Kept separate from the backend's
+# lightweight inference deps (backend uses ai-edge-litert, not full TF).
+tensorflow>=2.16,<2.20
+pillow
+numpy
+scikit-learn
+matplotlib

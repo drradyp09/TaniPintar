@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import time
 
@@ -32,44 +33,48 @@ class AIService:
     _output_details = None
     _chlorophyll_input_details = None
     _chlorophyll_output_details = None
-    
-    # PlantVillage Classes (38 classes)
-    # Note: The generic MobileNet model we downloaded has 1001 classes (ImageNet).
-    # We will map the top result to a mock PlantVillage class if using the generic model,
-    # OR we use the real class names if the user provides the real model.
-    # For now, we list the real PlantVillage classes so the UI looks correct when the real model is present.
+    # Full disease knowledge base loaded from models/diseases.json, keyed by the
+    # class label (e.g. "Daun_Tomat_Hawar_Tua"). Populated in _load_model().
+    _disease_details = {}
+
+    # Default classes for the locally-trained model (25 classes, Indonesian).
+    # This is a fallback; the authoritative order is loaded from labels.txt,
+    # which train_disease_model.py writes in the exact model-output order.
     _class_names = [
-        "Apple___Apple_scab", "Apple___Black_rot", "Apple___Cedar_apple_rust", "Apple___healthy",
-        "Blueberry___healthy", "Cherry_(including_sour)___Powdery_mildew", "Cherry_(including_sour)___healthy",
-        "Corn_(maize)___Cercospora_leaf_spot_Gray_leaf_spot", "Corn_(maize)___Common_rust_", "Corn_(maize)___Northern_Leaf_Blight", "Corn_(maize)___healthy",
-        "Grape___Black_rot", "Grape___Esca_(Black_Measles)", "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)", "Grape___healthy",
-        "Orange___Haunglongbing_(Citrus_greening)",
-        "Peach___Bacterial_spot", "Peach___healthy",
-        "Pepper,_bell___Bacterial_spot", "Pepper,_bell___healthy",
-        "Potato___Early_blight", "Potato___Late_blight", "Potato___healthy",
-        "Raspberry___healthy",
-        "Soybean___healthy",
-        "Squash___Powdery_mildew",
-        "Strawberry___Leaf_scorch", "Strawberry___healthy",
-        "Tomato___Bacterial_spot", "Tomato___Early_blight", "Tomato___Late_blight", "Tomato___Leaf_Mold", 
-        "Tomato___Septoria_leaf_spot", "Tomato___Spider_mites_Two-spotted_spider_mite", "Tomato___Target_Spot",
-        "Tomato___Tomato_Yellow_Leaf_Curl_Virus", "Tomato___Tomato_mosaic_virus", "Tomato___healthy"
+        "Daun_Anggur_Busuk", "Daun_Anggur_Esca", "Daun_Anggur_Hawar", "Daun_Anggur_Sehat",
+        "Daun_Apel_Busuk", "Daun_Apel_Karat", "Daun_Apel_Kudis", "Daun_Apel_Sehat",
+        "Daun_Jagung_Hawar", "Daun_Jagung_Jamur", "Daun_Jagung_Karat", "Daun_Jagung_Sehat",
+        "Daun_Kentang_Hawar_Muda", "Daun_Kentang_Hawar_Tua", "Daun_Kentang_Sehat",
+        "Daun_Tomat_Bakteri", "Daun_Tomat_Hawar_Muda", "Daun_Tomat_Hawar_Tua",
+        "Daun_Tomat_Jamur_Fulva", "Daun_Tomat_Jamur_Septoria", "Daun_Tomat_Jamur_Target_spot",
+        "Daun_Tomat_Sehat", "Daun_Tomat_Tungau_Labalaba",
+        "Daun_Tomat_Virus_Begomovirus", "Daun_Tomat_Virus_Mosaicvirus",
     ]
-    
+
+    # Keyed by the class label (case-insensitive substring match). Order matters:
+    # more specific keys must precede generic ones (e.g. "hawar_muda" before "hawar").
     _recommendations = {
-        "healthy": "Tanaman terlihat sehat. Lanjutkan pemeliharaan rutin.",
-        "Bacterial_spot": "Gunakan bakterisida tembaga dan hindari penyiraman dari atas daun.",
-        "Early_blight": "Potong daun yang terinfeksi dan aplikasikan fungisida preventif.",
-        "Late_blight": "Penyakit serius. Segera musnahkan bagian terinfeksi dan gunakan fungisida sistemik.",
-        "Leaf_Mold": "Kurangi kelembaban di sekitar tanaman dan sirkulasi udara yang baik.",
-        "Septoria_leaf_spot": "Bersihkan gulma dan sisa tanaman, gunakan fungisida berbasis chlorothalonil.",
-        "Spider_mites": "Gunakan akarisida atau predator alami. Semprotkan air untuk menjatuhkan tungau.",
-        "Target_Spot": "Gunakan fungisida yang tepat dan jaga kebersihan lahan.",
-        "Yellow_Leaf_Curl_Virus": "Kendalikan vektor kutu kebul (whitefly) dengan insektisida atau perangkap.",
-        "Mosaic_virus": "Tidak ada obat kimia. Cabut tanaman terinfeksi agar tidak menular.",
-        "Powdery_mildew": "Gunakan fungisida sulfur atau minyak hortikultura.",
-        "Common_rust": "Gunakan varietas tahan karat atau fungisida.",
-        "Northern_Leaf_Blight": "Gunakan varietas tahan, rotasi tanaman, dan fungisida jika perlu.",
+        "sehat": "Tanaman terlihat sehat. Lanjutkan pemeliharaan rutin dan pemantauan berkala.",
+        "anggur_busuk": "Busuk hitam anggur. Pangkas dan musnahkan bagian terinfeksi, aplikasikan fungisida berbahan mancozeb.",
+        "anggur_esca": "Esca (Black Measles). Pangkas kayu terinfeksi, hindari luka pemangkasan saat lembab, jaga vigor tanaman.",
+        "anggur_hawar": "Hawar daun anggur (Isariopsis). Perbaiki sirkulasi udara dan gunakan fungisida tembaga.",
+        "apel_busuk": "Busuk buah/daun apel (Black rot). Buang mumi buah dan ranting mati, semprot fungisida captan/mancozeb.",
+        "apel_karat": "Karat apel-cedar. Singkirkan inang juniper di sekitar, gunakan fungisida saat tunas muda.",
+        "apel_kudis": "Kudis apel (scab). Kumpulkan daun gugur, aplikasikan fungisida berbasis sulfur/captan sejak awal musim.",
+        "jagung_hawar": "Hawar daun jagung (Northern Leaf Blight). Gunakan varietas tahan, rotasi tanaman, fungisida bila parah.",
+        "jagung_jamur": "Bercak daun jagung (Gray leaf spot). Rotasi tanaman, olah sisa tanaman, fungisida strobilurin.",
+        "jagung_karat": "Karat jagung (Common rust). Gunakan varietas tahan; fungisida bila serangan dini dan berat.",
+        "kentang_hawar_muda": "Hawar dini kentang (Early blight). Pangkas daun terinfeksi, fungisida preventif chlorothalonil.",
+        "kentang_hawar_tua": "Hawar akhir kentang (Late blight). Penyakit serius; musnahkan tanaman sakit, fungisida sistemik segera.",
+        "tomat_bakteri": "Bercak bakteri tomat. Gunakan bakterisida tembaga, hindari penyiraman dari atas daun, benih sehat.",
+        "tomat_hawar_muda": "Hawar dini tomat (Early blight). Buang daun bawah terinfeksi, mulsa, fungisida preventif.",
+        "tomat_hawar_tua": "Hawar akhir tomat (Late blight). Penyakit serius; musnahkan bagian terinfeksi, fungisida sistemik.",
+        "tomat_jamur_fulva": "Kapang daun tomat (Leaf Mold). Turunkan kelembaban, tingkatkan ventilasi, fungisida bila perlu.",
+        "tomat_jamur_septoria": "Bercak Septoria. Bersihkan gulma dan sisa tanaman, fungisida berbasis chlorothalonil.",
+        "tomat_jamur_target_spot": "Target spot tomat. Jaga kebersihan lahan, rotasi, aplikasikan fungisida yang sesuai.",
+        "tomat_tungau_labalaba": "Tungau laba-laba. Gunakan akarisida atau predator alami, semprot air untuk menurunkan populasi.",
+        "tomat_virus_begomovirus": "Virus kuning keriting (Begomovirus). Kendalikan vektor kutu kebul, cabut tanaman terinfeksi.",
+        "tomat_virus_mosaicvirus": "Virus mosaik. Tidak ada obat kimia; cabut dan musnahkan tanaman terinfeksi, sanitasi alat.",
     }
 
     def __new__(cls):
@@ -79,16 +84,29 @@ class AIService:
         return cls._instance
 
     def _load_model(self):
-        if Interpreter is None:
-            return
-
         # Use absolute paths relative to this script
         current_dir = os.path.dirname(os.path.abspath(__file__))
         models_dir = os.path.abspath(os.path.join(current_dir, '..', 'models'))
         model_path = os.path.join(models_dir, 'plant_disease_model.tflite')
         chlorophyll_model_path = os.path.join(models_dir, 'plant_chlorophyll_model.tflite')
         labels_path = os.path.join(models_dir, 'labels.txt')
-        
+        diseases_path = os.path.join(models_dir, 'diseases.json')
+
+        # Load disease knowledge base (gejala, penyebab, penanganan, dst.).
+        # Loaded before the TFLite guard so details are available even in mock mode.
+        try:
+            if os.path.exists(diseases_path):
+                with open(diseases_path, 'r', encoding='utf-8') as f:
+                    self._disease_details = json.load(f)
+                print(f"Loaded {len(self._disease_details)} disease detail entries from diseases.json")
+            else:
+                print(f"diseases.json not found at {diseases_path}")
+        except Exception as e:
+            print(f"Failed to load diseases.json: {e}")
+
+        if Interpreter is None:
+            return
+
         try:
             # Load Labels
             if os.path.exists(labels_path):
@@ -150,11 +168,14 @@ class AIService:
             # Add batch dimension
             img_array = np.expand_dims(img_array, axis=0)
             
-            # Normalize
+            # Normalize.
+            # Our trained model (train_disease_model.py) bakes
+            # mobilenet_v2.preprocess_input INTO the graph, so it expects RAW
+            # [0, 255] float32 pixels — do NOT divide by 255 here or the input
+            # gets double-normalized. uint8 models take raw bytes.
             input_type = self._input_details[0]['dtype']
             if input_type == np.float32:
-                 # Try [0, 1] normalization which is common for some Android exports
-                 img_array = img_array.astype(np.float32) / 255.0
+                 img_array = img_array.astype(np.float32)
             elif input_type == np.uint8:
                  img_array = img_array.astype(np.uint8)
 
@@ -193,42 +214,41 @@ class AIService:
             # "apple apple scab" -> "Apple___Apple_scab" logic approximation
             # Actually, our recommendations map uses simple keys like "Apple_scab" or partial match.
             
-            disease_name = class_name.title() # "Apple Apple Scab"
-            
-            # Recommendation Lookup (Fuzzy Match)
+            # Prettify label for display: "Daun_Kentang_Hawar_Muda" -> "Daun Kentang Hawar Muda"
+            disease_name = class_name.replace("_", " ").title()
+
+            # Recommendation lookup. Normalise both sides to lowercase underscore
+            # form so keys like "kentang_hawar_muda" match "Daun_Kentang_Hawar_Muda".
             recommendation = "Konsultasikan dengan ahli pertanian setempat."
-            
-            # Map standard PlantVillage key words to our recommendation keys
-            # Our keys: Bacterial_spot, Early_blight, etc.
-            # Labels: "peach bacterial spot", "potato early blight"
-            
-            found_rec = False
+            clean_name = class_name.lower().replace(" ", "_")
+
             for key, rec in self._recommendations.items():
-                # Clean key: "Bacterial_spot" -> "bacterial spot"
-                clean_key = key.replace("_", " ").lower()
-                clean_name = class_name.lower()
-                
-                # Logic: Is the disease key in the class name?
-                # e.g. "bacterial spot" in "peach bacterial spot"
-                if clean_key in clean_name:
+                if key in clean_name:
                     recommendation = rec
-                    found_rec = True
                     break
-            
-            # Special case for "healthy"
-            if "healthy" in class_name.lower():
-                recommendation = self._recommendations["healthy"]
-            
+
+            # Support both Indonesian ("sehat") and English ("healthy") healthy labels.
+            if "healthy" in clean_name or "sehat" in clean_name:
+                recommendation = self._recommendations.get(
+                    "sehat", self._recommendations.get("healthy", recommendation)
+                )
+
             if class_name.lower() == "background":
                 disease_name = "Bukan Daun / Background"
                 recommendation = "Mohon foto daun tanaman secara closeup."
                 confidence = float(predictions[predicted_idx])
 
+            # Full disease knowledge base entry (gejala, penyebab, penanganan,
+            # pencegahan, tingkat_bahaya, mendesak, dst.), keyed by exact label.
+            details = self._disease_details.get(class_name)
+
             return {
                 'name': disease_name,
                 'confidence': round(confidence, 4),
                 'recommendation': recommendation,
-                'model_info': f'Valid-Model (Iter: {inference_time:.1f}ms)'
+                'model_info': f'Valid-Model (Iter: {inference_time:.1f}ms)',
+                'label': class_name,
+                'details': details,
             }
 
         except Exception as e:

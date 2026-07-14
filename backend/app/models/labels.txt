@@ -1,39 +1,25 @@
-apple apple scab
-apple black rot
-apple cedar apple rust
-apple healthy
-blueberry healthy
-cherry including sour powdery mildew
-cherry including sour healthy
-corn maize cercospora leaf spot gray leaf spot
-corn maize common rust 
-corn maize northern leaf blight
-corn maize healthy
-grape black rot
-grape esca black measles 
-grape leaf blight isariopsis leaf spot 
-grape healthy
-orange haunglongbing citrus greening 
-peach bacterial spot
-peach healthy
-pepper bell bacterial spot
-pepper bell healthy
-potato early blight
-potato late blight
-potato healthy
-raspberry healthy
-soybean healthy
-squash powdery mildew
-strawberry leaf scorch
-strawberry healthy
-tomato bacterial spot
-tomato early blight
-tomato late blight
-tomato leaf mold
-tomato septoria leaf spot
-tomato spider mites two spotted spider mite
-tomato target spot
-tomato tomato yellow leaf curl virus
-tomato tomato mosaic virus
-tomato healthy
-background
+Daun_Anggur_Busuk
+Daun_Anggur_Esca
+Daun_Anggur_Hawar
+Daun_Anggur_Sehat
+Daun_Apel_Busuk
+Daun_Apel_Karat
+Daun_Apel_Kudis
+Daun_Apel_Sehat
+Daun_Jagung_Hawar
+Daun_Jagung_Jamur
+Daun_Jagung_Karat
+Daun_Jagung_Sehat
+Daun_Kentang_Hawar_Muda
+Daun_Kentang_Hawar_Tua
+Daun_Kentang_Sehat
+Daun_Tomat_Bakteri
+Daun_Tomat_Hawar_Muda
+Daun_Tomat_Hawar_Tua
+Daun_Tomat_Jamur_Fulva
+Daun_Tomat_Jamur_Septoria
+Daun_Tomat_Jamur_Target_spot
+Daun_Tomat_Sehat
+Daun_Tomat_Tungau_Labalaba
+Daun_Tomat_Virus_Begomovirus
+Daun_Tomat_Virus_Mosaicvirus

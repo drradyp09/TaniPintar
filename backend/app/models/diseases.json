@@ -1,0 +1,572 @@
+{
+  "Daun_Anggur_Busuk": {
+    "nama": "Busuk Hitam Anggur",
+    "tanaman": "Anggur",
+    "penyakit": "Busuk hitam (Black rot)",
+    "patogen": "Jamur Guignardia bidwellii",
+    "sehat": false,
+    "gejala": "Bercak cokelat kemerahan bulat pada daun dengan tepi gelap; buah mengeriput menghitam seperti mumi.",
+    "penyebab": "Cuaca lembap dan hangat; spora menyebar dari sisa tanaman terinfeksi dan buah mumi yang tertinggal.",
+    "penanganan": [
+      "Buang dan musnahkan daun serta buah terinfeksi (jangan dikompos di kebun)",
+      "Pangkas untuk memperbaiki sirkulasi udara",
+      "Aplikasi fungisida berbahan aktif mankozeb atau miklobutanil sesuai anjuran petugas"
+    ],
+    "pencegahan": [
+      "Bersihkan sisa tanaman dan buah mumi setiap musim",
+      "Atur jarak tanam dan pangkas agar kanopi tidak terlalu rapat",
+      "Hindari membasahi daun saat menyiram"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Anggur_Esca": {
+    "nama": "Esca (Campak Hitam) Anggur",
+    "tanaman": "Anggur",
+    "penyakit": "Esca / Black Measles",
+    "patogen": "Kompleks jamur (Phaeomoniella chlamydospora, dll.)",
+    "sehat": false,
+    "gejala": "Garis-garis kuning/cokelat di antara tulang daun (pola belang harimau); buah bercak bintik gelap.",
+    "penyebab": "Infeksi jamur pada kayu/batang, sering lewat luka pangkasan; berkembang pada tanaman tua dan stres air.",
+    "penanganan": [
+      "Pangkas dan buang bagian kayu yang terinfeksi",
+      "Lindungi luka pangkasan dengan penutup luka",
+      "Jaga tanaman tidak stres air; tidak ada obat kuratif tuntas, fokus pengendalian"
+    ],
+    "pencegahan": [
+      "Pangkas saat cuaca kering, gunakan alat steril",
+      "Hindari luka besar pada batang",
+      "Buang tanaman terinfeksi berat untuk cegah penyebaran"
+    ],
+    "tingkat_bahaya": "tinggi",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Anggur_Hawar": {
+    "nama": "Hawar Daun Anggur",
+    "tanaman": "Anggur",
+    "penyakit": "Hawar daun (Isariopsis leaf blight)",
+    "patogen": "Jamur Pseudocercospora vitis",
+    "sehat": false,
+    "gejala": "Bercak cokelat tidak beraturan pada daun, dapat menyatu; daun menguning dan gugur dini.",
+    "penyebab": "Kelembapan tinggi dan hujan; spora menyebar lewat percikan air.",
+    "penanganan": [
+      "Buang daun terinfeksi",
+      "Perbaiki sirkulasi udara lewat pemangkasan",
+      "Fungisida berbasis tembaga sesuai anjuran"
+    ],
+    "pencegahan": [
+      "Jaga kebersihan kebun dari sisa daun",
+      "Hindari kelembapan berlebih pada kanopi",
+      "Rotasi/atur jarak tanam"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Anggur_Sehat": {
+    "nama": "Daun Anggur Sehat",
+    "tanaman": "Anggur",
+    "penyakit": "Sehat",
+    "patogen": null,
+    "sehat": true,
+    "gejala": "Daun hijau merata, tanpa bercak, tepi utuh.",
+    "penyebab": "Tanaman dalam kondisi baik.",
+    "penanganan": [
+      "Lanjutkan perawatan rutin",
+      "Pantau berkala untuk deteksi dini"
+    ],
+    "pencegahan": [
+      "Pemupukan seimbang",
+      "Jaga sanitasi kebun",
+      "Pemangkasan teratur"
+    ],
+    "tingkat_bahaya": "sehat",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Apel_Busuk": {
+    "nama": "Busuk Hitam Apel",
+    "tanaman": "Apel",
+    "penyakit": "Busuk hitam (Black rot)",
+    "patogen": "Jamur Botryosphaeria obtusa",
+    "sehat": false,
+    "gejala": "Bercak ungu kecil membesar jadi cokelat dengan cincin konsentris (mata katak); buah membusuk.",
+    "penyebab": "Jamur bertahan di ranting/buah mati; menyebar saat lembap.",
+    "penanganan": [
+      "Pangkas ranting mati dan buang buah mumi",
+      "Musnahkan bagian terinfeksi",
+      "Fungisida (kaptan/mankozeb) sesuai anjuran"
+    ],
+    "pencegahan": [
+      "Sanitasi kebun dari kayu dan buah mati",
+      "Pemangkasan untuk sirkulasi udara",
+      "Hindari luka pada buah dan batang"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Apel_Karat": {
+    "nama": "Karat Apel-Cedar",
+    "tanaman": "Apel",
+    "penyakit": "Karat (Cedar apple rust)",
+    "patogen": "Jamur Gymnosporangium juniperi-virginianae",
+    "sehat": false,
+    "gejala": "Bercak kuning-oranye cerah di permukaan daun, kadang dengan struktur seperti tabung di bawah daun.",
+    "penyebab": "Butuh inang perantara pohon juniper/cedar; spora berpindah saat musim lembap.",
+    "penanganan": [
+      "Buang daun terinfeksi",
+      "Jauhkan dari tanaman juniper/cedar inang",
+      "Fungisida preventif saat awal musim sesuai anjuran"
+    ],
+    "pencegahan": [
+      "Hindari menanam dekat juniper",
+      "Pilih varietas tahan karat",
+      "Pantau di awal musim semi/hujan"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Apel_Kudis": {
+    "nama": "Kudis Apel (Scab)",
+    "tanaman": "Apel",
+    "penyakit": "Kudis (Apple scab)",
+    "patogen": "Jamur Venturia inaequalis",
+    "sehat": false,
+    "gejala": "Bercak zaitun-hijau hingga cokelat kehitaman berbulu pada daun dan buah; daun bisa keriput dan gugur.",
+    "penyebab": "Jamur bertahan di daun gugur; infeksi saat daun basah lama di musim hujan.",
+    "penanganan": [
+      "Kumpulkan dan musnahkan daun gugur",
+      "Fungisida (kaptan/mankozeb) mulai awal musim",
+      "Pemangkasan untuk mempercepat daun kering"
+    ],
+    "pencegahan": [
+      "Sanitasi daun gugur akhir musim",
+      "Pilih varietas tahan kudis",
+      "Atur kanopi agar cepat kering setelah hujan"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Apel_Sehat": {
+    "nama": "Daun Apel Sehat",
+    "tanaman": "Apel",
+    "penyakit": "Sehat",
+    "patogen": null,
+    "sehat": true,
+    "gejala": "Daun hijau segar, tanpa bercak atau perubahan warna.",
+    "penyebab": "Tanaman dalam kondisi baik.",
+    "penanganan": [
+      "Lanjutkan perawatan rutin",
+      "Pantau berkala"
+    ],
+    "pencegahan": [
+      "Pemupukan seimbang",
+      "Sanitasi kebun",
+      "Pemangkasan teratur"
+    ],
+    "tingkat_bahaya": "sehat",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Jagung_Hawar": {
+    "nama": "Hawar Daun Jagung (Utara)",
+    "tanaman": "Jagung",
+    "penyakit": "Hawar daun utara (Northern leaf blight)",
+    "patogen": "Jamur Exserohilum turcicum",
+    "sehat": false,
+    "gejala": "Lesi memanjang berbentuk cerutu abu-abu kehijauan, membesar hingga menyatu dan mengeringkan daun.",
+    "penyebab": "Cuaca sejuk lembap; spora bertahan di sisa tanaman.",
+    "penanganan": [
+      "Buang/olah sisa tanaman terinfeksi",
+      "Fungisida (strobilurin/triazol) bila serangan berat",
+      "Perbaiki drainase dan jarak tanam"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman non-jagung",
+      "Gunakan benih varietas tahan",
+      "Kelola sisa panen (bajak/dekomposisi)"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Jagung_Jamur": {
+    "nama": "Bercak Daun Kelabu Jagung",
+    "tanaman": "Jagung",
+    "penyakit": "Bercak daun kelabu (Gray leaf spot)",
+    "patogen": "Jamur Cercospora zeae-maydis",
+    "sehat": false,
+    "gejala": "Bercak persegi panjang sempit abu-abu hingga cokelat, dibatasi tulang daun.",
+    "penyebab": "Kelembapan tinggi berkepanjangan; spora dari sisa tanaman.",
+    "penanganan": [
+      "Kelola sisa tanaman terinfeksi",
+      "Fungisida sesuai ambang serangan dan anjuran",
+      "Atur populasi tanaman agar tidak terlalu rapat"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman",
+      "Varietas tahan",
+      "Pengolahan tanah untuk mempercepat pelapukan sisa panen"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Jagung_Karat": {
+    "nama": "Karat Jagung",
+    "tanaman": "Jagung",
+    "penyakit": "Karat umum (Common rust)",
+    "patogen": "Jamur Puccinia sorghi",
+    "sehat": false,
+    "gejala": "Pustula (bintil) kecil cokelat kemerahan di kedua sisi daun, pecah mengeluarkan serbuk karat.",
+    "penyebab": "Suhu sedang dan lembap; spora terbawa angin.",
+    "penanganan": [
+      "Pantau dan buang daun terserang berat",
+      "Fungisida bila serangan dini dan meluas",
+      "Jaga tanaman tidak stres agar tahan"
+    ],
+    "pencegahan": [
+      "Tanam varietas tahan",
+      "Hindari tanam terlalu rapat",
+      "Pemantauan rutin awal musim"
+    ],
+    "tingkat_bahaya": "rendah",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Jagung_Sehat": {
+    "nama": "Daun Jagung Sehat",
+    "tanaman": "Jagung",
+    "penyakit": "Sehat",
+    "patogen": null,
+    "sehat": true,
+    "gejala": "Daun hijau memanjang merata tanpa lesi.",
+    "penyebab": "Tanaman dalam kondisi baik.",
+    "penanganan": [
+      "Lanjutkan perawatan rutin",
+      "Pantau berkala"
+    ],
+    "pencegahan": [
+      "Pemupukan seimbang",
+      "Pengairan cukup",
+      "Pemantauan hama-penyakit"
+    ],
+    "tingkat_bahaya": "sehat",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Kentang_Hawar_Muda": {
+    "nama": "Hawar Dini Kentang",
+    "tanaman": "Kentang",
+    "penyakit": "Hawar dini (Early blight)",
+    "patogen": "Jamur Alternaria solani",
+    "sehat": false,
+    "gejala": "Bercak cokelat dengan cincin konsentris (pola mata sasaran) pada daun tua; daun menguning di sekitarnya.",
+    "penyebab": "Cuaca hangat lembap bergantian kering; jamur bertahan di sisa tanaman.",
+    "penanganan": [
+      "Buang daun terinfeksi bagian bawah",
+      "Fungisida (mankozeb/klorotalonil) sesuai anjuran",
+      "Pemupukan cukup agar tanaman tidak lemah"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman non-solanaceae",
+      "Jarak tanam untuk sirkulasi udara",
+      "Hindari membasahi daun; sanitasi sisa tanaman"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Kentang_Hawar_Tua": {
+    "nama": "Hawar Lambat Kentang",
+    "tanaman": "Kentang",
+    "penyakit": "Hawar lambat (Late blight)",
+    "patogen": "Oomycete Phytophthora infestans",
+    "sehat": false,
+    "gejala": "Bercak basah gelap tak beraturan pada daun, tepi pucat berkabut putih di bawah daun saat lembap; menyebar sangat cepat.",
+    "penyebab": "Suhu sejuk dan kelembapan sangat tinggi; penyebaran cepat lewat spora.",
+    "penanganan": [
+      "Segera buang dan musnahkan tanaman terinfeksi",
+      "Fungisida sistemik sesuai anjuran secepatnya",
+      "Hentikan pengairan dari atas"
+    ],
+    "pencegahan": [
+      "Gunakan benih/umbi bebas penyakit",
+      "Pantau ketat saat cuaca sejuk-lembap",
+      "Rotasi tanaman dan sanitasi ketat"
+    ],
+    "tingkat_bahaya": "tinggi",
+    "mendesak": true,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Kentang_Sehat": {
+    "nama": "Daun Kentang Sehat",
+    "tanaman": "Kentang",
+    "penyakit": "Sehat",
+    "patogen": null,
+    "sehat": true,
+    "gejala": "Daun hijau merata tanpa bercak.",
+    "penyebab": "Tanaman dalam kondisi baik.",
+    "penanganan": [
+      "Lanjutkan perawatan rutin",
+      "Pantau berkala terutama saat cuaca lembap"
+    ],
+    "pencegahan": [
+      "Pemupukan seimbang",
+      "Sanitasi lahan",
+      "Rotasi tanaman"
+    ],
+    "tingkat_bahaya": "sehat",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Bakteri": {
+    "nama": "Bercak Bakteri Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Bercak bakteri (Bacterial spot)",
+    "patogen": "Bakteri Xanthomonas spp.",
+    "sehat": false,
+    "gejala": "Bercak kecil basah gelap pada daun dengan halo kuning; daun bisa berlubang dan gugur; buah berkeropeng.",
+    "penyebab": "Cuaca hangat lembap; menyebar lewat percikan air, alat, dan benih terinfeksi.",
+    "penanganan": [
+      "Buang daun/tanaman terinfeksi",
+      "Semprot berbasis tembaga sesuai anjuran",
+      "Hindari bekerja saat tanaman basah"
+    ],
+    "pencegahan": [
+      "Gunakan benih sehat bersertifikat",
+      "Rotasi tanaman dan sanitasi alat",
+      "Pengairan di pangkal, bukan menyiram daun"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Hawar_Muda": {
+    "nama": "Hawar Dini Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Hawar dini (Early blight)",
+    "patogen": "Jamur Alternaria solani",
+    "sehat": false,
+    "gejala": "Bercak cokelat cincin konsentris pada daun tua, mulai dari bawah; daun menguning dan gugur.",
+    "penyebab": "Kelembapan dan suhu hangat; jamur bertahan di sisa tanaman/tanah.",
+    "penanganan": [
+      "Pangkas daun bawah terinfeksi",
+      "Fungisida (mankozeb/klorotalonil) sesuai anjuran",
+      "Beri mulsa agar spora tanah tidak memercik ke daun"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman",
+      "Jarak tanam dan ajir untuk sirkulasi",
+      "Hindari menyiram daun; sanitasi sisa tanaman"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Hawar_Tua": {
+    "nama": "Hawar Lambat Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Hawar lambat (Late blight)",
+    "patogen": "Oomycete Phytophthora infestans",
+    "sehat": false,
+    "gejala": "Bercak basah gelap besar pada daun dan batang, berkabut putih di bawah daun saat lembap; menyebar cepat.",
+    "penyebab": "Suhu sejuk dan kelembapan tinggi; penyebaran spora sangat cepat.",
+    "penanganan": [
+      "Segera musnahkan tanaman terinfeksi",
+      "Fungisida sistemik secepatnya sesuai anjuran",
+      "Kurangi kelembapan kanopi"
+    ],
+    "pencegahan": [
+      "Bibit sehat dan varietas tahan",
+      "Pemantauan ketat saat cuaca sejuk-lembap",
+      "Rotasi dan sanitasi"
+    ],
+    "tingkat_bahaya": "tinggi",
+    "mendesak": true,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Jamur_Fulva": {
+    "nama": "Kapang Daun Tomat (Fulva)",
+    "tanaman": "Tomat",
+    "penyakit": "Kapang daun (Leaf mold)",
+    "patogen": "Jamur Passalora fulva (Fulvia fulva)",
+    "sehat": false,
+    "gejala": "Bercak kuning di permukaan atas daun; lapisan beludru zaitun-cokelat di bawah daun.",
+    "penyebab": "Kelembapan sangat tinggi, umum di rumah kaca dengan ventilasi buruk.",
+    "penanganan": [
+      "Tingkatkan ventilasi dan kurangi kelembapan",
+      "Buang daun terinfeksi",
+      "Fungisida sesuai anjuran bila meluas"
+    ],
+    "pencegahan": [
+      "Atur jarak tanam dan ventilasi",
+      "Hindari kelembapan daun berkepanjangan",
+      "Varietas tahan bila tersedia"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Jamur_Septoria": {
+    "nama": "Bercak Septoria Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Bercak daun Septoria",
+    "patogen": "Jamur Septoria lycopersici",
+    "sehat": false,
+    "gejala": "Banyak bercak kecil bulat, tepi gelap dengan pusat abu-abu dan titik hitam kecil; mulai dari daun bawah.",
+    "penyebab": "Cuaca lembap hangat; menyebar lewat percikan air dan sisa tanaman.",
+    "penanganan": [
+      "Buang daun bawah terinfeksi",
+      "Fungisida (klorotalonil/mankozeb) sesuai anjuran",
+      "Mulsa untuk kurangi percikan tanah"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman",
+      "Jarak tanam untuk sirkulasi udara",
+      "Pengairan di pangkal, sanitasi sisa tanaman"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Jamur_Target_spot": {
+    "nama": "Bercak Target Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Bercak target (Target spot)",
+    "patogen": "Jamur Corynespora cassiicola",
+    "sehat": false,
+    "gejala": "Bercak cokelat dengan cincin konsentris menyerupai sasaran pada daun; dapat menyerang buah.",
+    "penyebab": "Kelembapan tinggi dan hangat; spora dari sisa tanaman.",
+    "penanganan": [
+      "Buang daun terinfeksi",
+      "Fungisida sesuai anjuran",
+      "Perbaiki sirkulasi udara"
+    ],
+    "pencegahan": [
+      "Rotasi tanaman",
+      "Jarak tanam dan pemangkasan",
+      "Hindari kelembapan daun berlebih"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Sehat": {
+    "nama": "Daun Tomat Sehat",
+    "tanaman": "Tomat",
+    "penyakit": "Sehat",
+    "patogen": null,
+    "sehat": true,
+    "gejala": "Daun hijau segar tanpa bercak atau perubahan warna.",
+    "penyebab": "Tanaman dalam kondisi baik.",
+    "penanganan": [
+      "Lanjutkan perawatan rutin",
+      "Pantau berkala"
+    ],
+    "pencegahan": [
+      "Pemupukan seimbang",
+      "Pengairan di pangkal",
+      "Sanitasi dan rotasi"
+    ],
+    "tingkat_bahaya": "sehat",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Tungau_Labalaba": {
+    "nama": "Tungau Laba-laba Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Serangan tungau laba-laba dua bintik",
+    "patogen": "Tungau Tetranychus urticae (hama)",
+    "sehat": false,
+    "gejala": "Bintik-bintik kuning halus (stippling) pada daun, daun memucat/perunggu; jaring halus di bawah daun saat berat.",
+    "penyebab": "Cuaca panas kering; populasi tungau meledak cepat.",
+    "penanganan": [
+      "Semprot air kuat ke bawah daun untuk kurangi populasi",
+      "Gunakan akarisida/sabun insektisida sesuai anjuran",
+      "Dorong musuh alami (tungau predator)"
+    ],
+    "pencegahan": [
+      "Jaga kelembapan, hindari tanaman stres kering",
+      "Pantau bawah daun secara rutin",
+      "Hindari penggunaan insektisida berlebih yang membunuh predator"
+    ],
+    "tingkat_bahaya": "sedang",
+    "mendesak": false,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Virus_Begomovirus": {
+    "nama": "Virus Keriting Kuning Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Tomato Yellow Leaf Curl Virus (Begomovirus)",
+    "patogen": "Begomovirus (ditular kutu kebul)",
+    "sehat": false,
+    "gejala": "Daun mengeriting ke atas, menguning di tepi, tanaman kerdil, bunga/buah rontok.",
+    "penyebab": "Ditularkan kutu kebul (Bemisia tabaci); tidak menular lewat sentuhan biasa.",
+    "penanganan": [
+      "Cabut dan musnahkan tanaman terinfeksi",
+      "Kendalikan kutu kebul (perangkap kuning, insektisida sesuai anjuran)",
+      "Tidak ada obat kuratif virus; fokus kendalikan vektor"
+    ],
+    "pencegahan": [
+      "Gunakan varietas tahan dan bibit sehat",
+      "Pasang jaring/mulsa perak untuk usir kutu kebul",
+      "Sanitasi gulma inang di sekitar lahan"
+    ],
+    "tingkat_bahaya": "tinggi",
+    "mendesak": true,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  },
+  "Daun_Tomat_Virus_Mosaicvirus": {
+    "nama": "Virus Mosaik Tomat",
+    "tanaman": "Tomat",
+    "penyakit": "Tomato Mosaic Virus (ToMV)",
+    "patogen": "Tobamovirus (ToMV/TMV)",
+    "sehat": false,
+    "gejala": "Pola mosaik hijau muda-tua belang pada daun, daun keriput/menyempit, pertumbuhan terhambat.",
+    "penyebab": "Sangat menular lewat sentuhan, alat, dan tangan; bertahan di sisa tanaman.",
+    "penanganan": [
+      "Cabut dan musnahkan tanaman terinfeksi",
+      "Cuci tangan dan sterilkan alat setelah kontak",
+      "Tidak ada obat kuratif; cegah penyebaran mekanis"
+    ],
+    "pencegahan": [
+      "Gunakan benih/varietas tahan",
+      "Sterilisasi alat dan tangan sebelum bekerja",
+      "Hindari merokok dekat tanaman (tembakau sumber TMV)"
+    ],
+    "tingkat_bahaya": "tinggi",
+    "mendesak": true,
+    "validated": false,
+    "sumber": "Referensi umum patologi tanaman (PlantVillage, materi penyuluhan). BELUM divalidasi ahli lokal."
+  }
+}

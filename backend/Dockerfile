@@ -18,8 +18,8 @@ COPY . /app
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 5000 available to the world outside this container
-EXPOSE 5000
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
 
 # Gunicorn tuning:
 #   --preload    load the app (and TFLite models) ONCE in the master, then fork
@@ -27,4 +27,4 @@ EXPOSE 5000
 #   -w 2         fewer workers; ML model + opencv make each worker memory-heavy.
 #   --timeout    give slow model inference / boot room before worker is killed.
 # Override worker count at runtime with GUNICORN_WORKERS.
-CMD ["sh", "-c", "gunicorn --preload -w ${GUNICORN_WORKERS:-2} --timeout 120 -b 0.0.0.0:5000 run:app"]
+CMD ["sh", "-c", "gunicorn --preload -w ${GUNICORN_WORKERS:-2} --timeout 120 -b 0.0.0.0:8000 run:app"]
