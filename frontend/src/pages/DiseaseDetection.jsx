@@ -194,17 +194,46 @@ const DiseaseDetails = ({ details }) => {
 // Keep in sync with backend MAX_UPLOAD_MB (app/__init__.py).
 const MAX_UPLOAD_MB = 3;
 const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
-const MAX_IMAGE_DIMENSION = 1920;
+const COMPRESSION_QUALITY_STEPS = [
+  1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35,
+  0.3,
+];
+const RESIZE_STEP_FACTOR = 0.85;
+const MIN_IMAGE_SIDE = 96;
+const MAX_COMPRESSION_ROUNDS = 20;
 
 const shouldNormalizeImage = (file) => {
-  const mime = (file?.type || "").toLowerCase();
-  const isHeic = mime.includes("heic") || mime.includes("heif");
   const isLarge = file?.size > MAX_UPLOAD_BYTES;
-  return isHeic || isLarge;
+  return isLarge;
 };
 
-const normalizeImageForUpload = async (file) => {
+const canvasToJpegBlob = (canvas, quality) =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (resultBlob) => {
+        if (resultBlob) {
+          resolve(resultBlob);
+        } else {
+          reject(new Error("Gagal mengonversi gambar"));
+        }
+      },
+      "image/jpeg",
+      quality,
+    );
+  });
+
+const normalizeImageForUpload = async (file, onProgress) => {
   if (!file || !shouldNormalizeImage(file)) return file;
+
+  const reportProgress = (percent, message) => {
+    if (typeof onProgress !== "function") return;
+    onProgress({
+      percent: Math.max(0, Math.min(100, Math.round(percent))),
+      message,
+    });
+  };
+
+  reportProgress(5, "Menyiapkan kompresi gambar...");
 
   const objectUrl = URL.createObjectURL(file);
   try {
@@ -217,39 +246,103 @@ const normalizeImageForUpload = async (file) => {
 
     const width = img.naturalWidth || img.width;
     const height = img.naturalHeight || img.height;
-    const largestSide = Math.max(width, height);
-    const scale =
-      largestSide > MAX_IMAGE_DIMENSION ? MAX_IMAGE_DIMENSION / largestSide : 1;
-    const targetWidth = Math.max(1, Math.round(width * scale));
-    const targetHeight = Math.max(1, Math.round(height * scale));
 
     const canvas = document.createElement("canvas");
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
     const ctx = canvas.getContext("2d");
 
     if (!ctx) {
       throw new Error("Canvas tidak tersedia");
     }
 
-    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+    let targetWidth = width;
+    let targetHeight = height;
+    let compressedBlob = null;
+    const totalMainAttempts =
+      MAX_COMPRESSION_ROUNDS * COMPRESSION_QUALITY_STEPS.length;
+    let mainAttempts = 0;
 
-    const blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (resultBlob) => {
-          if (resultBlob) {
-            resolve(resultBlob);
-          } else {
-            reject(new Error("Gagal mengonversi gambar"));
-          }
-        },
-        "image/jpeg",
-        0.88,
+    // Prioritize visual quality first, then shrink dimensions step-by-step
+    // until payload fits under backend upload limit.
+    for (let round = 0; round < MAX_COMPRESSION_ROUNDS; round += 1) {
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      ctx.clearRect(0, 0, targetWidth, targetHeight);
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+      for (const quality of COMPRESSION_QUALITY_STEPS) {
+        const blob = await canvasToJpegBlob(canvas, quality);
+        mainAttempts += 1;
+        const progress = 5 + (mainAttempts / totalMainAttempts) * 83;
+        reportProgress(progress, "Mengompres gambar...");
+        if (blob.size <= MAX_UPLOAD_BYTES) {
+          compressedBlob = blob;
+          break;
+        }
+      }
+
+      if (compressedBlob) {
+        break;
+      }
+
+      const nextWidth = Math.max(
+        MIN_IMAGE_SIDE,
+        Math.floor(targetWidth * RESIZE_STEP_FACTOR),
       );
-    });
+      const nextHeight = Math.max(
+        MIN_IMAGE_SIDE,
+        Math.floor(targetHeight * RESIZE_STEP_FACTOR),
+      );
+
+      if (nextWidth === targetWidth && nextHeight === targetHeight) {
+        break;
+      }
+
+      targetWidth = nextWidth;
+      targetHeight = nextHeight;
+    }
+
+    if (!compressedBlob) {
+      // Emergency fallback: preserve aspect ratio, then keep shrinking until fit.
+      reportProgress(90, "Optimasi tahap akhir...");
+      const largestSide = Math.max(width, height);
+      const baseScale =
+        largestSide > MIN_IMAGE_SIDE ? MIN_IMAGE_SIDE / largestSide : 1;
+      let emergencyWidth = Math.max(1, Math.floor(width * baseScale));
+      let emergencyHeight = Math.max(1, Math.floor(height * baseScale));
+      let emergencyAttempts = 0;
+
+      canvas.width = emergencyWidth;
+      canvas.height = emergencyHeight;
+      ctx.clearRect(0, 0, emergencyWidth, emergencyHeight);
+      ctx.drawImage(img, 0, 0, emergencyWidth, emergencyHeight);
+      compressedBlob = await canvasToJpegBlob(canvas, 0.3);
+
+      while (
+        compressedBlob.size > MAX_UPLOAD_BYTES &&
+        (emergencyWidth > 1 || emergencyHeight > 1)
+      ) {
+        emergencyWidth = Math.max(1, Math.floor(emergencyWidth * 0.75));
+        emergencyHeight = Math.max(1, Math.floor(emergencyHeight * 0.75));
+        canvas.width = emergencyWidth;
+        canvas.height = emergencyHeight;
+        ctx.clearRect(0, 0, emergencyWidth, emergencyHeight);
+        ctx.drawImage(img, 0, 0, emergencyWidth, emergencyHeight);
+        compressedBlob = await canvasToJpegBlob(canvas, 0.25);
+        emergencyAttempts += 1;
+        reportProgress(
+          Math.min(99, 90 + emergencyAttempts * 2),
+          "Optimasi tahap akhir...",
+        );
+      }
+    }
+
+    if (compressedBlob.size > MAX_UPLOAD_BYTES) {
+      throw new Error("Tidak dapat mengompres gambar di bawah batas ukuran");
+    }
 
     const normalizedName = file.name.replace(/\.[^.]+$/, "") || "leaf";
-    return new File([blob], `${normalizedName}.jpg`, {
+    reportProgress(100, "Kompresi selesai.");
+    return new File([compressedBlob], `${normalizedName}.jpg`, {
       type: "image/jpeg",
       lastModified: Date.now(),
     });
@@ -266,6 +359,7 @@ const DiseaseDetection = () => {
   const [result, setResult] = useState(null);
   const [mode, setMode] = useState("disease"); // 'disease' or 'chlorophyll'
   const [notice, setNotice] = useState(null); // { kind: 'not-leaf' | 'error', message }
+  const [compressionProgress, setCompressionProgress] = useState(null); // { percent, message }
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -300,25 +394,20 @@ const DiseaseDetection = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Reject oversized files client-side (keep in sync with backend MAX_UPLOAD_MB).
-    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
-      setImage(null);
-      setPreviewUrl(null);
-      setResult(null);
-      setNotice({
-        kind: "error",
-        message: `Ukuran gambar ${(file.size / 1024 / 1024).toFixed(
-          1,
-        )} MB melebihi batas. Maksimal ${MAX_UPLOAD_MB} MB — coba foto beresolusi lebih kecil.`,
-      });
-      e.target.value = "";
-      return;
-    }
-
     setImage(file);
     setPreviewUrl(URL.createObjectURL(file));
     setResult(null);
-    setNotice(null);
+    setCompressionProgress(null);
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setNotice({
+        kind: "info",
+        message: `Ukuran gambar awal ${(file.size / 1024 / 1024).toFixed(
+          1,
+        )} MB. Gambar akan dikompres otomatis di perangkat sebelum dianalisis.`,
+      });
+    } else {
+      setNotice(null);
+    }
   };
 
   const handleAnalyze = async () => {
@@ -326,11 +415,22 @@ const DiseaseDetection = () => {
 
     setLoading(true);
     setNotice(null);
+    setCompressionProgress(null);
 
     let uploadImage = image;
 
     try {
-      uploadImage = await normalizeImageForUpload(image);
+      uploadImage = await normalizeImageForUpload(image, (progress) => {
+        setCompressionProgress((prev) => {
+          if (
+            prev?.percent === progress.percent &&
+            prev?.message === progress.message
+          ) {
+            return prev;
+          }
+          return progress;
+        });
+      });
     } catch (normalizeError) {
       if (import.meta.env.DEV) {
         console.warn(
@@ -344,6 +444,7 @@ const DiseaseDetection = () => {
           message:
             "Gagal mengompres gambar dari perangkat. Ukuran masih terlalu besar. Coba crop atau kecilkan resolusi foto lalu unggah ulang.",
         });
+        setCompressionProgress(null);
         setLoading(false);
         return;
       }
@@ -353,14 +454,10 @@ const DiseaseDetection = () => {
     if (uploadImage.size > MAX_UPLOAD_BYTES) {
       setNotice({
         kind: "error",
-        message: `Ukuran gambar masih terlalu besar (${(
-          uploadImage.size /
-          1024 /
-          1024
-        ).toFixed(
-          1,
-        )} MB). Maksimal ${MAX_UPLOAD_MB} MB. Coba crop atau turunkan resolusi foto.`,
+        message:
+          "Kompresi otomatis gagal mencapai batas ukuran upload. Silakan pilih foto lain atau crop area daun lebih dekat.",
       });
+      setCompressionProgress(null);
       setLoading(false);
       return;
     }
@@ -368,6 +465,7 @@ const DiseaseDetection = () => {
     const formData = new FormData();
     formData.append("image", uploadImage);
     formData.append("type", mode);
+    setCompressionProgress(null);
 
     try {
       const response = await fetch(
@@ -403,6 +501,7 @@ const DiseaseDetection = () => {
           setResult(null);
           setImage(null);
           setPreviewUrl(null);
+          setCompressionProgress(null);
           setNotice({
             kind: "error",
             message:
@@ -460,6 +559,7 @@ const DiseaseDetection = () => {
         });
       }
     } finally {
+      setCompressionProgress(null);
       setLoading(false);
     }
   };
@@ -654,6 +754,8 @@ const DiseaseDetection = () => {
                   setPreviewUrl(null);
                   setImage(null);
                   setResult(null);
+                  setNotice(null);
+                  setCompressionProgress(null);
                   if (fileInputRef.current) fileInputRef.current.value = "";
                   if (cameraInputRef.current) cameraInputRef.current.value = "";
                 }}
@@ -749,6 +851,61 @@ const DiseaseDetection = () => {
             style={{ display: "none" }}
           />
 
+          {loading && compressionProgress && (
+            <div
+              style={{
+                marginTop: "1rem",
+                padding: "0.9rem",
+                borderRadius: "12px",
+                background: "rgba(33, 150, 243, 0.08)",
+                border: "1px solid rgba(33, 150, 243, 0.35)",
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "0.82rem",
+                  fontWeight: "700",
+                  color: "#1565C0",
+                  marginBottom: "0.45rem",
+                }}
+              >
+                {compressionProgress.message}
+              </div>
+              <div
+                style={{
+                  width: "100%",
+                  height: "7px",
+                  borderRadius: "999px",
+                  background: "rgba(33, 150, 243, 0.15)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${compressionProgress.percent}%`,
+                    height: "100%",
+                    borderRadius: "999px",
+                    background:
+                      "linear-gradient(90deg, rgba(33,150,243,0.7), rgba(33,150,243,1))",
+                    transition: "width 180ms ease",
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: "0.35rem",
+                  fontSize: "0.78rem",
+                  fontWeight: "700",
+                  color: "#1976D2",
+                  textAlign: "right",
+                }}
+              >
+                {compressionProgress.percent}%
+              </div>
+            </div>
+          )}
+
           {notice && (
             <div
               style={{
@@ -762,16 +919,24 @@ const DiseaseDetection = () => {
                 background:
                   notice.kind === "not-leaf"
                     ? "rgba(255, 160, 0, 0.08)"
-                    : "rgba(229, 57, 53, 0.08)",
+                    : notice.kind === "info"
+                      ? "rgba(33, 150, 243, 0.08)"
+                      : "rgba(229, 57, 53, 0.08)",
                 border: `1.5px solid ${
                   notice.kind === "not-leaf"
                     ? "rgba(255, 160, 0, 0.35)"
-                    : "rgba(229, 57, 53, 0.35)"
+                    : notice.kind === "info"
+                      ? "rgba(33, 150, 243, 0.35)"
+                      : "rgba(229, 57, 53, 0.35)"
                 }`,
               }}
             >
               <div style={{ fontSize: "1.6rem", lineHeight: 1 }}>
-                {notice.kind === "not-leaf" ? "🍃" : "⚠️"}
+                {notice.kind === "not-leaf"
+                  ? "🍃"
+                  : notice.kind === "info"
+                    ? "ℹ️"
+                    : "⚠️"}
               </div>
               <div>
                 <p
@@ -782,12 +947,16 @@ const DiseaseDetection = () => {
                     color:
                       notice.kind === "not-leaf"
                         ? "var(--color-accent)"
-                        : "var(--color-error)",
+                        : notice.kind === "info"
+                          ? "#1565C0"
+                          : "var(--color-error)",
                   }}
                 >
                   {notice.kind === "not-leaf"
                     ? "Bukan Foto Daun"
-                    : "Gagal Menganalisis"}
+                    : notice.kind === "info"
+                      ? "Info Upload"
+                      : "Gagal Menganalisis"}
                 </p>
                 <p
                   style={{
@@ -820,7 +989,9 @@ const DiseaseDetection = () => {
                 <span
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  Memproses AI...
+                  {compressionProgress
+                    ? `Mengompres gambar... ${compressionProgress.percent}%`
+                    : "Memproses AI..."}
                 </span>
               ) : (
                 "Mulai Analisis Sekarang"
