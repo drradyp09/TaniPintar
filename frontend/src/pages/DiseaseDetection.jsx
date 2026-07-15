@@ -199,13 +199,20 @@ const DiseaseDetection = () => {
   const [result, setResult] = useState(null);
   const [mode, setMode] = useState("disease"); // 'disease' or 'chlorophyll'
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const handleBack = () => {
     navigate("/dashboard");
   };
 
-  const handleCameraClick = () => {
+  // Gallery picker (no `capture`, so Android shows the photo picker / gallery).
+  const handleGalleryClick = () => {
     fileInputRef.current.click();
+  };
+
+  // Camera capture (`capture` input, opens the camera on both Android and iOS).
+  const handleCameraClick = () => {
+    cameraInputRef.current.click();
   };
 
   const handleFileChange = (e) => {
@@ -388,7 +395,7 @@ const DiseaseDetection = () => {
         >
           {!previewUrl ? (
             <div
-              onClick={handleCameraClick}
+              onClick={handleGalleryClick}
               className="scale-hover"
               style={{
                 height: "260px",
@@ -450,6 +457,7 @@ const DiseaseDetection = () => {
                   setImage(null);
                   setResult(null);
                   if (fileInputRef.current) fileInputRef.current.value = "";
+                  if (cameraInputRef.current) cameraInputRef.current.value = "";
                 }}
                 style={{
                   position: "absolute",
@@ -475,10 +483,70 @@ const DiseaseDetection = () => {
             </div>
           )}
 
+          {!previewUrl && (
+            <div style={{ display: "flex", gap: "0.8rem", marginTop: "1rem" }}>
+              <button
+                type="button"
+                onClick={handleGalleryClick}
+                className="scale-hover"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.9rem",
+                  borderRadius: "14px",
+                  border: "1.5px solid var(--color-primary-light)",
+                  background: "rgba(76, 175, 80, 0.06)",
+                  color: "var(--color-primary-dark)",
+                  fontWeight: "800",
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                }}
+              >
+                🖼️ Galeri
+              </button>
+              <button
+                type="button"
+                onClick={handleCameraClick}
+                className="scale-hover"
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  padding: "0.9rem",
+                  borderRadius: "14px",
+                  border: "none",
+                  background:
+                    "linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)",
+                  color: "var(--color-white)",
+                  fontWeight: "800",
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                }}
+              >
+                📷 Kamera
+              </button>
+            </div>
+          )}
+
+          {/* Gallery input: no `capture` so Android opens the photo picker. */}
           <input
             type="file"
             accept="image/*"
             ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
+          {/* Camera input: `capture` opens the device camera directly. */}
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            ref={cameraInputRef}
             onChange={handleFileChange}
             style={{ display: "none" }}
           />
