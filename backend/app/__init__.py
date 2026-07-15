@@ -47,6 +47,19 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
 
+    @login_manager.unauthorized_handler
+    def unauthorized():  # pyright: ignore[reportUnusedFunction]
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "error": "Authentication required",
+                    "message": "Sesi login sudah berakhir. Silakan login ulang.",
+                }
+            ),
+            401,
+        )
+
     # CORS Configuration
     allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(
         ","

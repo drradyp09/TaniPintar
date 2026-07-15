@@ -193,6 +193,70 @@ const DiseaseDetails = ({ details }) => {
 
 // Keep in sync with backend MAX_UPLOAD_MB (app/__init__.py).
 const MAX_UPLOAD_MB = 3;
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1920;
+
+const shouldNormalizeImage = (file) => {
+  const mime = (file?.type || "").toLowerCase();
+  const isHeic = mime.includes("heic") || mime.includes("heif");
+  const isLarge = file?.size > MAX_UPLOAD_BYTES;
+  return isHeic || isLarge;
+};
+
+const normalizeImageForUpload = async (file) => {
+  if (!file || !shouldNormalizeImage(file)) return file;
+
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const nextImg = new Image();
+      nextImg.onload = () => resolve(nextImg);
+      nextImg.onerror = () => reject(new Error("Gagal membaca gambar"));
+      nextImg.src = objectUrl;
+    });
+
+    const width = img.naturalWidth || img.width;
+    const height = img.naturalHeight || img.height;
+    const largestSide = Math.max(width, height);
+    const scale =
+      largestSide > MAX_IMAGE_DIMENSION ? MAX_IMAGE_DIMENSION / largestSide : 1;
+    const targetWidth = Math.max(1, Math.round(width * scale));
+    const targetHeight = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("Canvas tidak tersedia");
+    }
+
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (resultBlob) => {
+          if (resultBlob) {
+            resolve(resultBlob);
+          } else {
+            reject(new Error("Gagal mengonversi gambar"));
+          }
+        },
+        "image/jpeg",
+        0.88,
+      );
+    });
+
+    const normalizedName = file.name.replace(/\.[^.]+$/, "") || "leaf";
+    return new File([blob], `${normalizedName}.jpg`, {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+};
 
 const DiseaseDetection = () => {
   const navigate = useNavigate();
@@ -215,6 +279,11 @@ const DiseaseDetection = () => {
 
   const handleBack = () => {
     navigate("/dashboard");
+  };
+
+  const logoutExpiredSession = () => {
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
   };
 
   // Gallery picker (no `capture`, so Android shows the photo picker / gallery).
@@ -257,8 +326,47 @@ const DiseaseDetection = () => {
 
     setLoading(true);
     setNotice(null);
+
+    let uploadImage = image;
+
+    try {
+      uploadImage = await normalizeImageForUpload(image);
+    } catch (normalizeError) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          "Image normalization failed, fallback to original file",
+          normalizeError,
+        );
+      }
+      if (image.size > MAX_UPLOAD_BYTES) {
+        setNotice({
+          kind: "error",
+          message:
+            "Gagal mengompres gambar dari perangkat. Ukuran masih terlalu besar. Coba crop atau kecilkan resolusi foto lalu unggah ulang.",
+        });
+        setLoading(false);
+        return;
+      }
+      uploadImage = image;
+    }
+
+    if (uploadImage.size > MAX_UPLOAD_BYTES) {
+      setNotice({
+        kind: "error",
+        message: `Ukuran gambar masih terlalu besar (${(
+          uploadImage.size /
+          1024 /
+          1024
+        ).toFixed(
+          1,
+        )} MB). Maksimal ${MAX_UPLOAD_MB} MB. Coba crop atau turunkan resolusi foto.`,
+      });
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("image", image);
+    formData.append("image", uploadImage);
     formData.append("type", mode);
 
     try {
@@ -291,6 +399,19 @@ const DiseaseDetection = () => {
               errorData.message ||
               "Objek pada foto tidak terdeteksi sebagai daun. Pastikan daun terlihat jelas dan closeup.",
           });
+        } else if (response.status === 401 || response.status === 403) {
+          setResult(null);
+          setImage(null);
+          setPreviewUrl(null);
+          setNotice({
+            kind: "error",
+            message:
+              errorData.error ||
+              errorData.message ||
+              "Sesi login sudah berakhir. Silakan login ulang lalu coba lagi.",
+          });
+          logoutExpiredSession();
+          return;
         } else if (response.status === 413) {
           setNotice({
             kind: "error",
