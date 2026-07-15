@@ -37,6 +37,12 @@ class AIService:
     # class label (e.g. "Daun_Tomat_Hawar_Tua"). Populated in _load_model().
     _disease_details = {}
 
+    # Out-of-distribution gate. The classifier only ever saw leaf classes, so a
+    # non-leaf photo produces a low top-confidence and a high (spread-out)
+    # normalized entropy. Both conditions must look "leaf-like" to accept.
+    _CONF_THRESHOLD = 0.55        # top softmax probability must be >= this
+    _ENTROPY_THRESHOLD = 0.62     # normalized entropy [0,1] must be <= this
+
     # Default classes for the locally-trained model (25 classes, Indonesian).
     # This is a fallback; the authoritative order is loaded from labels.txt,
     # which train_disease_model.py writes in the exact model-output order.
@@ -197,18 +203,32 @@ class AIService:
                 if scale > 0:
                     predictions = (predictions.astype(np.float32) - zero_point) * scale
 
-            predicted_idx = np.argmax(predictions)
-            
+            # Normalize to a proper probability distribution. The model ends in
+            # softmax, but guard against logit/near-normalized output so the
+            # confidence + entropy gate below is well-defined.
+            probs = predictions.astype(np.float32).ravel()
+            if probs.min() < 0 or not (0.98 < probs.sum() < 1.02):
+                shifted = np.exp(probs - probs.max())
+                probs = shifted / shifted.sum()
+
+            predicted_idx = int(np.argmax(probs))
+
             if predicted_idx < len(self._class_names):
                 class_name = self._class_names[predicted_idx]
             else:
                 class_name = "Unknown"
-            
-            # Confidence
-            # Softmax if not already applied (some models output logits)
-            # Simple check: if sum is approx 1.0, it's softmax. If large numbers, logits.
-            # But TFLite usually outputs probability if last layer is Softmax.
-            confidence = float(predictions[predicted_idx])
+
+            confidence = float(probs[predicted_idx])
+
+            # Out-of-distribution / leaf gate: normalized Shannon entropy in [0,1].
+            # Low entropy + high confidence => a class the model is sure about.
+            eps = 1e-9
+            entropy = float(-np.sum(probs * np.log(probs + eps)))
+            entropy_norm = entropy / float(np.log(len(probs))) if len(probs) > 1 else 0.0
+            is_leaf = (
+                confidence >= self._CONF_THRESHOLD
+                and entropy_norm <= self._ENTROPY_THRESHOLD
+            )
             
             # Format Name for Recommendation Lookup
             # "apple apple scab" -> "Apple___Apple_scab" logic approximation
@@ -236,7 +256,7 @@ class AIService:
             if class_name.lower() == "background":
                 disease_name = "Bukan Daun / Background"
                 recommendation = "Mohon foto daun tanaman secara closeup."
-                confidence = float(predictions[predicted_idx])
+                is_leaf = False
 
             # Full disease knowledge base entry (gejala, penyebab, penanganan,
             # pencegahan, tingkat_bahaya, mendesak, dst.), keyed by exact label.
@@ -249,6 +269,8 @@ class AIService:
                 'model_info': f'Valid-Model (Iter: {inference_time:.1f}ms)',
                 'label': class_name,
                 'details': details,
+                'is_leaf': is_leaf,
+                'entropy': round(entropy_norm, 4),
             }
 
         except Exception as e:

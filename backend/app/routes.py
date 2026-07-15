@@ -336,6 +336,23 @@ def analyze_disease():
                 {"status": "error", "message": "Gagal melakukan prediksi AI."}
             ), 500
 
+        # Second gate: the classifier is confident only for real leaf classes.
+        # Low confidence / high entropy => the photo is not a recognizable leaf,
+        # even if the color-based segmentation let it through.
+        if result.get("is_leaf") is False:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": (
+                        "Gambar tidak dikenali sebagai daun tanaman. Model tidak "
+                        "yakin dengan hasilnya. Pastikan foto fokus pada satu daun "
+                        "secara closeup dengan pencahayaan cukup."
+                    ),
+                    "confidence": result.get("confidence"),
+                    "leaf_area": leaf_percentage,
+                }
+            ), 422
+
     return jsonify(
         {
             "status": "success",

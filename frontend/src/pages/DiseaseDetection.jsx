@@ -191,6 +191,9 @@ const DiseaseDetails = ({ details }) => {
   );
 };
 
+// Keep in sync with backend MAX_UPLOAD_MB (app/__init__.py).
+const MAX_UPLOAD_MB = 3;
+
 const DiseaseDetection = () => {
   const navigate = useNavigate();
   const [image, setImage] = useState(null);
@@ -226,12 +229,27 @@ const DiseaseDetection = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    if (!file) return;
+
+    // Reject oversized files client-side (keep in sync with backend MAX_UPLOAD_MB).
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      setImage(null);
+      setPreviewUrl(null);
       setResult(null);
-      setNotice(null);
+      setNotice({
+        kind: "error",
+        message: `Ukuran gambar ${(file.size / 1024 / 1024).toFixed(
+          1,
+        )} MB melebihi batas. Maksimal ${MAX_UPLOAD_MB} MB — coba foto beresolusi lebih kecil.`,
+      });
+      e.target.value = "";
+      return;
     }
+
+    setImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setResult(null);
+    setNotice(null);
   };
 
   const handleAnalyze = async () => {
@@ -272,6 +290,13 @@ const DiseaseDetection = () => {
             message:
               errorData.message ||
               "Objek pada foto tidak terdeteksi sebagai daun. Pastikan daun terlihat jelas dan closeup.",
+          });
+        } else if (response.status === 413) {
+          setNotice({
+            kind: "error",
+            message:
+              errorData.message ||
+              `Ukuran file terlalu besar. Maksimal ${MAX_UPLOAD_MB} MB.`,
           });
         } else {
           setNotice({

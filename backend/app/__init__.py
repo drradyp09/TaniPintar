@@ -1,12 +1,16 @@
 import os
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+
+# Maximum accepted upload size (phone photos are large; keep in sync with the
+# nginx `client_max_body_size` in front of this app).
+MAX_UPLOAD_MB = 3
 
 
 def create_app():
@@ -22,6 +26,22 @@ def create_app():
 
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///tanipintar.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # Reject oversized uploads with a clean JSON 413 (instead of a raw error).
+    app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
+
+    @app.errorhandler(413)
+    def request_entity_too_large(_e):  # pyright: ignore[reportUnusedFunction]
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": f"Ukuran file terlalu besar. Maksimal {MAX_UPLOAD_MB} MB.",
+                    "max_mb": MAX_UPLOAD_MB,
+                }
+            ),
+            413,
+        )
 
     # Initialize extensions
     db.init_app(app)
