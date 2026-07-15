@@ -198,8 +198,17 @@ const DiseaseDetection = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [mode, setMode] = useState("disease"); // 'disease' or 'chlorophyll'
+  const [notice, setNotice] = useState(null); // { kind: 'not-leaf' | 'error', message }
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
+
+  // iOS Safari's file picker already offers "Photo Library / Take Photo / Choose
+  // File" from one input, so the explicit Galeri/Kamera buttons are redundant
+  // there. Android's picker doesn't, so we show the two buttons on Android.
+  // (iPadOS 13+ reports as "MacIntel" but has touch points.)
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   const handleBack = () => {
     navigate("/dashboard");
@@ -221,6 +230,7 @@ const DiseaseDetection = () => {
       setImage(file);
       setPreviewUrl(URL.createObjectURL(file));
       setResult(null);
+      setNotice(null);
     }
   };
 
@@ -228,6 +238,7 @@ const DiseaseDetection = () => {
     if (!image) return;
 
     setLoading(true);
+    setNotice(null);
     const formData = new FormData();
     formData.append("image", image);
     formData.append("type", mode);
@@ -254,13 +265,30 @@ const DiseaseDetection = () => {
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage =
-          errorData.error || errorData.message || "Gagal menganalisis gambar.";
-        alert(`Error (${response.status}): ${errorMessage}`);
+        // 422 = the backend's leaf-segmentation rejected the photo (not a leaf).
+        if (response.status === 422) {
+          setNotice({
+            kind: "not-leaf",
+            message:
+              errorData.message ||
+              "Objek pada foto tidak terdeteksi sebagai daun. Pastikan daun terlihat jelas dan closeup.",
+          });
+        } else {
+          setNotice({
+            kind: "error",
+            message:
+              errorData.error ||
+              errorData.message ||
+              "Gagal menganalisis gambar. Coba lagi.",
+          });
+        }
       }
     } catch (error) {
       console.error("Error analyzing image:", error);
-      alert("Terjadi kesalahan koneksi.");
+      setNotice({
+        kind: "error",
+        message: "Terjadi kesalahan koneksi. Periksa jaringan Anda.",
+      });
     } finally {
       setLoading(false);
     }
@@ -483,7 +511,7 @@ const DiseaseDetection = () => {
             </div>
           )}
 
-          {!previewUrl && (
+          {!previewUrl && !isIOS && (
             <div style={{ display: "flex", gap: "0.8rem", marginTop: "1rem" }}>
               <button
                 type="button"
@@ -550,6 +578,60 @@ const DiseaseDetection = () => {
             onChange={handleFileChange}
             style={{ display: "none" }}
           />
+
+          {notice && (
+            <div
+              style={{
+                display: "flex",
+                gap: "0.8rem",
+                alignItems: "flex-start",
+                marginTop: "1rem",
+                padding: "1rem",
+                borderRadius: "14px",
+                textAlign: "left",
+                background:
+                  notice.kind === "not-leaf"
+                    ? "rgba(255, 160, 0, 0.08)"
+                    : "rgba(229, 57, 53, 0.08)",
+                border: `1.5px solid ${
+                  notice.kind === "not-leaf"
+                    ? "rgba(255, 160, 0, 0.35)"
+                    : "rgba(229, 57, 53, 0.35)"
+                }`,
+              }}
+            >
+              <div style={{ fontSize: "1.6rem", lineHeight: 1 }}>
+                {notice.kind === "not-leaf" ? "🍃" : "⚠️"}
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 0.2rem 0",
+                    fontWeight: "800",
+                    fontSize: "0.95rem",
+                    color:
+                      notice.kind === "not-leaf"
+                        ? "var(--color-accent)"
+                        : "var(--color-error)",
+                  }}
+                >
+                  {notice.kind === "not-leaf"
+                    ? "Bukan Foto Daun"
+                    : "Gagal Menganalisis"}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "0.85rem",
+                    color: "var(--color-text-light)",
+                    fontWeight: "500",
+                  }}
+                >
+                  {notice.message}
+                </p>
+              </div>
+            </div>
+          )}
 
           {previewUrl && !result && (
             <button

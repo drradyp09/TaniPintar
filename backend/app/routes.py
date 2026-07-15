@@ -325,9 +325,11 @@ def analyze_disease():
         # We should use the masked image for prediction to ensure background doesn't affect result.
 
         import base64
-        # masked_bytes = base64.b64decode(masked_base64)
 
-        result = ai_service.predict_disease(image_bytes)
+        masked_bytes = base64.b64decode(masked_base64)
+
+        # result = ai_service.predict_disease(image_bytes)
+        result = ai_service.predict_disease(masked_bytes)
 
         if not result:
             return jsonify(
@@ -341,7 +343,8 @@ def analyze_disease():
             "result": result,
             "segmentation": {
                 "leaf_area_percentage": leaf_percentage,
-                "masked_image": base64.b64encode(image_bytes).decode("utf-8"),
+                # "masked_image": base64.b64encode(image_bytes).decode("utf-8"),
+                "masked_image": masked_base64,
             },
             "timestamp": datetime.datetime.now().isoformat(),
         }
