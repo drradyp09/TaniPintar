@@ -310,10 +310,34 @@ const DiseaseDetection = () => {
       }
     } catch (error) {
       console.error("Error analyzing image:", error);
-      setNotice({
-        kind: "error",
-        message: "Terjadi kesalahan koneksi. Periksa jaringan Anda.",
-      });
+      // Only a genuine network failure should blame the connection. `fetch`
+      // rejects with a TypeError ("Failed to fetch" / Safari "Load failed")
+      // only when the request never completed (offline, DNS, server
+      // unreachable, CORS block). Any other throw here is an app/parse error
+      // that happened AFTER a successful response — don't mislabel it.
+      const isOffline =
+        typeof navigator !== "undefined" && navigator.onLine === false;
+      const isNetworkError = error instanceof TypeError;
+
+      if (isOffline) {
+        setNotice({
+          kind: "error",
+          message: "Tidak ada koneksi internet. Periksa jaringan Anda.",
+        });
+      } else if (isNetworkError) {
+        setNotice({
+          kind: "error",
+          message:
+            "Tidak dapat terhubung ke server. Pastikan server aktif dan koneksi stabil.",
+        });
+      } else {
+        setNotice({
+          kind: "error",
+          message: `Terjadi kesalahan saat memproses hasil${
+            error?.message ? `: ${error.message}` : "."
+          }`,
+        });
+      }
     } finally {
       setLoading(false);
     }
